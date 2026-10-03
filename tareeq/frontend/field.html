@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14212b">
+<title>طريق · بلاغات ميدانية</title>
+<link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="/static/field.css">
+</head>
+<body>
+
+<!-- sign in with the access code issued in the operator console -->
+<section id="login" class="screen" hidden>
+  <div class="login-box">
+    <div class="logo">طريق</div>
+    <h1 data-en="Field reports">بلاغات ميدانية</h1>
+    <p data-en="For aid workers and trusted reporters. Enter the access code your coordinator gave you.">للعاملين في المجال الإنساني والمراسلين الموثوقين. أدخل رمز الدخول من منسّقك.</p>
+    <form id="loginform">
+      <input id="code" autocomplete="off" autocapitalize="characters" placeholder="XXXX-XXXX" dir="ltr" inputmode="text">
+      <button class="primary" data-en="Sign in">دخول</button>
+    </form>
+    <p class="err" id="loginerr" hidden></p>
+    <p class="hint" id="demohint" hidden data-en="Demo code: DEMO-0000">رمز تجريبي: DEMO-0000</p>
+    <p class="fine" data-en="Your location is used only to find the road you report. It is never stored or tracked.">نستخدم موقعك فقط لتحديد الطريق الذي تبلغ عنه. لا يُخزَّن ولا يُتتبَّع.</p>
+  </div>
+</section>
+
+<section id="app" class="screen" hidden>
+  <header class="top">
+    <div class="who"><b id="who">—</b> <span id="net" class="net"></span></div>
+    <div class="top-btns">
+      <span id="queued" class="queued" hidden></span>
+      <button id="lang" class="chip">EN</button>
+      <button id="logout" class="chip" data-en="Exit" title="Sign out">خروج</button>
+    </div>
+  </header>
+
+  <div id="map"></div>
+  <div id="crosshair" class="crosshair" hidden>＋</div>
+
+  <div class="fabs">
+    <button id="locate" class="fab small" title="My location">◎</button>
+    <button id="report" class="fab big" data-en="Report">بلّغ</button>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+  <div id="legend" class="legend"></div>
+
+  <!-- report sheet -->
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-head">
+      <b data-en="What's on the road?">ماذا على الطريق؟</b>
+      <button id="closesheet" class="chip">✕</button>
+    </div>
+    <div class="where">
+      <label><input type="radio" name="where" value="gps" checked> <span data-en="At my location">في موقعي</span> <small id="gpsacc"></small></label>
+      <label><input type="radio" name="where" value="pin"> <span data-en="At the map pin (＋)">عند العلامة (＋)</span></label>
+    </div>
+    <div class="kinds" id="kinds"></div>
+    <input id="note" maxlength="140" placeholder="ملاحظة قصيرة (اختياري)" data-en-placeholder="Short note (optional)">
+    <p class="fine" data-en="Safety reports (strike, checkpoint, ordnance) close the road for everyone straight away.">بلاغات الخطر (قصف، حاجز، ذخائر) تغلق الطريق للجميع فوراً.</p>
+  </div>
+</section>
+
+<script src="/static/vendor/leaflet/leaflet.js"></script>
+<script src="/static/vendor/protomaps-leaflet/protomaps-leaflet.js"></script>
+<script src="/static/field.js"></script>
+</body>
+</html>

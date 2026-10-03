@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>طريق · لوحة التشغيل</title>
+<link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css">
+<style>
+  :root { --bar: #14212b; --line: #e3dfd6; --muted: #6b6a66; --accent: #0b5cad; --danger: #c62828; --ok: #1a7f37; --warn: #b26b00; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif; font-size: 14px; color: #1d1d1b; background: #f6f4ef; }
+  html[dir=ltr] body { font-family: "Segoe UI", system-ui, sans-serif; }
+  button { font: inherit; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 4px 10px; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+  button.ok { background: var(--ok); color: #fff; border-color: var(--ok); }
+  button:disabled { opacity: .5; cursor: default; }
+  input, select, textarea { font: inherit; padding: 6px; border: 1px solid #ccc; border-radius: 6px; width: 100%; }
+  small, .muted { color: var(--muted); }
+  header { display: flex; justify-content: space-between; align-items: center; background: var(--bar); color: #fff; padding: 8px 14px; }
+  header b { font-size: 20px; } header button { background: #22343f; color: #fff; border-color: #3a4f5c; }
+  .demo-flag { background: #b26b00; border-radius: 6px; padding: 1px 8px; font-size: 12px; margin-inline-start: 8px; }
+  #login { max-width: 340px; margin: 12vh auto; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 2px 10px #0002; display: flex; flex-direction: column; gap: 10px; }
+  #app { display: grid; grid-template-columns: 480px 1fr; height: calc(100% - 46px); }
+  #side { overflow-y: auto; border-inline-end: 1px solid var(--line); background: #fff; }
+  nav { display: flex; flex-wrap: wrap; gap: 2px; padding: 6px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; z-index: 5; }
+  nav button { border: 0; background: none; padding: 6px 10px; border-radius: 6px; }
+  nav button.on { background: var(--bar); color: #fff; }
+  nav .badge { background: var(--danger); color: #fff; border-radius: 8px; padding: 0 6px; font-size: 11px; margin-inline-start: 4px; }
+  .tab { padding: 10px 12px; }
+  .card { border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+  .card h4 { margin: 0 0 4px; }
+  .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  .stat b { display: block; font-size: 22px; }
+  .pill { display: inline-block; border-radius: 10px; padding: 0 8px; font-size: 12px; background: #eee; }
+  .pill.pending, .pill.pending_removal, .pill.requested { background: #fff1d6; color: #8a4b00; }
+  .pill.active { background: #ffe1e1; color: #8b1111; } .pill.removed, .pill.rejected, .pill.inactive, .pill.expired { background: #eee; color: #777; }
+  .pill.sent { background: #dff3e4; color: #1a5f2e; }
+  .codebox { font-family: ui-monospace, monospace; font-size: 22px; letter-spacing: 2px; background: #fff7e6; border: 2px dashed #e8590c; padding: 8px; text-align: center; border-radius: 8px; }
+  #map { height: 100%; }
+  .basemap { filter: grayscale(1) contrast(.85) brightness(1.08); opacity: .55; }
+  .hint { background: #eef5ff; border: 1px solid #c9dcf5; border-radius: 8px; padding: 8px; margin-bottom: 8px; }
+  .err { color: var(--danger); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; } td { border-bottom: 1px solid #eee; padding: 4px 2px; vertical-align: top; }
+</style>
+</head>
+<body>
+<header>
+  <div><b>طريق</b> <span data-en="Operator console">لوحة التشغيل</span><span id="demoflag" class="demo-flag" hidden>DEMO</span></div>
+  <div><span id="whoami"></span> <button id="lang">EN</button> <button id="logout" hidden data-en="Sign out">خروج</button></div>
+</header>
+
+<form id="login" hidden>
+  <h3 data-en="Operator sign in">دخول المشغّل</h3>
+  <input id="lname" placeholder="name" dir="ltr" autocomplete="username">
+  <input id="lpass" type="password" placeholder="password" dir="ltr" autocomplete="current-password">
+  <button class="primary" data-en="Sign in">دخول</button>
+  <div class="err" id="lerr"></div>
+  <small id="ldemo" hidden>Demo: amal / demo · omar / demo — <span data-en="sign in as each in two browsers to try the two-person rule">ادخل بكل اسم في متصفح مختلف لتجربة قاعدة الشخصين</span></small>
+</form>
+
+<div id="app" hidden>
+  <aside id="side">
+    <nav id="tabs"></nav>
+    <div id="content"></div>
+  </aside>
+  <div id="map"></div>
+</div>
+
+<script src="/static/vendor/leaflet/leaflet.js"></script>
+<script src="/static/vendor/protomaps-leaflet/protomaps-leaflet.js"></script>
+<script src="/static/admin.js"></script>
+</body>
+</html>

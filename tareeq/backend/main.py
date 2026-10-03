@@ -354,3 +354,6 @@ def basemap():
 
 
 app.mount("/static", StaticFiles(directory=FRONTEND), name="static")
+
+import ops  # noqa: E402  operator console, field reports, strike hazards (see ops.py)
+ops.install(app, globals())
