@@ -113,3 +113,27 @@ footer small { color: #9fb0bb; display: block; }
 .langtoggle:hover { background: #2f4654; }
 html[dir=ltr] body { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
 html[dir=ltr] .leaflet-popup-content { direction: ltr; text-align: left; }
+
+/* ---- phones (spec W1): one scrolling column, route answer first, map right under it ----
+   .panel becomes display:contents so its cards can be ordered around the map. */
+@media (max-width: 700px) {
+  html, body { height: auto; }
+  body { display: block; font-size: 16px; }
+  header { padding: 6px 10px; gap: 8px; position: sticky; top: 0; z-index: 1200; }
+  header .tag small, .brand .tag { display: none; }
+  .logo { font-size: 22px; }
+  .clock { font-size: 12px; padding: 3px 6px; }
+  main { display: flex; flex-direction: column; }
+  .panel { display: contents; }
+  .panel > * { margin: 8px 10px 0; }
+  #netbar { order: 1; } .panel > .card:first-of-type { order: 2; } #result { order: 3; }
+  #map { order: 4; height: 58vh; min-height: 320px; margin-top: 8px; }
+  #saved { order: 5; } .phone-wrap { order: 6; } .demo { order: 7; margin-bottom: 10px; }
+  .phone-wrap { border: 0; padding: 8px 10px 0; }
+  .phone { height: 70vh; border-radius: 18px; }
+  input, select, button { font-size: 16px; }           /* no zoom-on-focus on mobile browsers */
+  button, .modes label { min-height: 40px; }
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .legend { position: static; margin: 8px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 0 8px; font-size: 12px; }
+  footer { font-size: 11px; }
+}
