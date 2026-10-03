@@ -1,0 +1,94 @@
+{
+ "type": "FeatureCollection",
+ "_note": "ILLUSTRATIVE polygons for the hackathon demo only. NOT real safety data. Production must ingest OCHA/UN access maps.",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "eastern_zone",
+    "name": "منطقة محظورة (توضيحية)",
+    "name_en": "Restricted zone (illustrative)",
+    "source": "demo",
+    "active": true,
+    "kind": "yellow_line"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       34.35,
+       31.26
+      ],
+      [
+       34.385,
+       31.26
+      ],
+      [
+       34.385,
+       31.47
+      ],
+      [
+       34.375,
+       31.47
+      ],
+      [
+       34.372,
+       31.425
+      ],
+      [
+       34.363,
+       31.39
+      ],
+      [
+       34.353,
+       31.35
+      ],
+      [
+       34.35,
+       31.26
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "evac_order_demo",
+    "name": "أمر إخلاء جديد (توضيحي)",
+    "name_en": "New evacuation order (illustrative)",
+    "source": "demo",
+    "active": false,
+    "kind": "evacuation"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       34.2785,
+       31.3535
+      ],
+      [
+       34.2835,
+       31.3535
+      ],
+      [
+       34.2835,
+       31.358
+      ],
+      [
+       34.2785,
+       31.358
+      ],
+      [
+       34.2785,
+       31.3535
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

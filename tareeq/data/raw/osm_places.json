@@ -1,0 +1,625 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-10-03T11:11:31Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 505035532,
+  "lat": 31.4183455,
+  "lon": 34.3502476,
+  "tags": {
+    "name": "دير البلح",
+    "name:ar": "دير البلح",
+    "name:br": "Deir el-Balah",
+    "name:cs": "Dajr al-Balah",
+    "name:cy": "Deir al-Balah",
+    "name:de": "Dair al-Balah",
+    "name:en": "Deir el-Balah",
+    "name:eo": "Deir el-Balah",
+    "name:es": "Dair Al Balah",
+    "name:eu": "Deir al-Balah",
+    "name:fa": "دير البلح",
+    "name:fr": "Deir el-Balah",
+    "name:he": "דיר אל-בלאח",
+    "name:hi": "दीर अल बाला",
+    "name:hr": "Deir al-Balah",
+    "name:it": "Dayr al-Balah",
+    "name:ja": "デイル・アル・バラ",
+    "name:ko": "데이르 알 발라흐",
+    "name:ml": "ദെയ്ർ അൽ-ബല",
+    "name:nl": "Dayr al-Balah",
+    "name:no": "Deir al-Balah",
+    "name:pl": "Dajr al-Balah",
+    "name:pt": "Deir al-Balah",
+    "name:ru": "Дейр-эль-Балах",
+    "name:sco": "Deir al-Balah",
+    "name:tr": "Deir al Balah",
+    "name:uk": "Дейр аль-Балах",
+    "name:ur": "دیر البلح",
+    "name:zh": "代尔拜莱赫",
+    "name:zh-Hans": "代尔拜莱赫",
+    "name:zh-Hant": "代爾拜萊赫",
+    "place": "town",
+    "population": "49751",
+    "wikidata": "Q557383",
+    "wikipedia": "ar:دير البلح",
+    "wikipedia:ar": "دير البلح"
+  }
+},
+{
+  "type": "node",
+  "id": 505041386,
+  "lat": 31.4247734,
+  "lon": 34.3401033,
+  "tags": {
+    "amenity": "refugee_site",
+    "name": "مخيّم دير البلح",
+    "name:ar": "مخيّم دير البلح",
+    "name:en": "Deir al-Balah Refugee Camp",
+    "name:fr": "Deir el-Balah",
+    "name:he": "מחנה פליטים דיר אל-בלח",
+    "name:ja": "デイル・アル・バラ難民キャンプ",
+    "name:ko": "데이르 알 발라흐 난민촌",
+    "place": "suburb",
+    "population": "20000",
+    "wikidata": "Q3021326",
+    "wikipedia": "en:Deir al-Balah Camp",
+    "wikipedia:en": "Deir al-Balah Camp"
+  }
+},
+{
+  "type": "node",
+  "id": 505115716,
+  "lat": 31.3782508,
+  "lon": 34.3355147,
+  "tags": {
+    "name": "القرارة",
+    "name:ar": "القرارة",
+    "name:de": "al-Qarara",
+    "name:en": "al-Qarara",
+    "name:es": "Al Qarara",
+    "name:eu": "Al Qarara",
+    "name:fa": "قرارہ",
+    "name:fr": "Al Qarara",
+    "name:he": "אל-קרארה",
+    "name:hr": "Al-Karara",
+    "name:ja": "アル・カララ",
+    "name:ko": "알 까라라",
+    "name:no": "Al-Qarara",
+    "name:pl": "Al-Karara",
+    "name:sr": "Ел-Карара",
+    "name:ur": "القرارہ",
+    "place": "town",
+    "population": "16918",
+    "source": "http://en.wikipedia.org/wiki/Al-Qarara",
+    "wikidata": "Q1814845",
+    "wikipedia": "en:Al-Qarara",
+    "wikipedia:en": "Al-Qarara"
+  }
+},
+{
+  "type": "node",
+  "id": 3176361897,
+  "lat": 31.4000485,
+  "lon": 34.3381461,
+  "tags": {
+    "alt_name:ar": "البرصان",
+    "alt_name:ko": "움 자이르;움 다이르;움 다히르;움 자히르",
+    "name": "حارة أم ظهير",
+    "name:ar": "حارة أم ظهير",
+    "name:de": "Am Dhair",
+    "name:en": "Am Dhair",
+    "name:fr": "Am Dhair",
+    "name:he": "ואדי א-סלקה",
+    "name:id": "Am Dhair",
+    "name:ko": "하라 움 자히르",
+    "place": "village",
+    "population": "4660",
+    "short_name:ar": "أم ظهير",
+    "source": "Local Knowledage"
+  }
+},
+{
+  "type": "node",
+  "id": 4326015989,
+  "lat": 31.3762177,
+  "lon": 34.3192758,
+  "tags": {
+    "addr:street": "شارع جمال عبد الناصر",
+    "fixme": "place type wrong?",
+    "name": "مدينة حمد",
+    "name:ar": "مدينة حمد",
+    "name:en": "Hamad Town",
+    "name:he": "מדינת חמד",
+    "place": "neighbourhood"
+  }
+},
+{
+  "type": "node",
+  "id": 4550544990,
+  "lat": 31.3502267,
+  "lon": 34.2900367,
+  "tags": {
+    "amenity": "clinic",
+    "healthcare": "clinic",
+    "name": "عيادة خان يونس",
+    "name:ar": "عيادة خان يونس",
+    "name:en": "Khanyounis Health Care center"
+  }
+},
+{
+  "type": "node",
+  "id": 4724730889,
+  "lat": 31.3434472,
+  "lon": 34.3039146,
+  "tags": {
+    "addr:street": "شارع السنية",
+    "amenity": "clinic",
+    "name": "عيادة الصفا",
+    "name:ar": "عيادة الصفا"
+  }
+},
+{
+  "type": "node",
+  "id": 5668706622,
+  "lat": 31.3555064,
+  "lon": 34.2938890,
+  "tags": {
+    "amenity": "clinic",
+    "healthcare": "clinic",
+    "name": "جمعية أرض الإنسان الفلسطينية الخيرية",
+    "name:ar": "جمعية أرض الإنسان الفلسطينية الخيرية",
+    "name:en": "Ard Al Insan Palestinian Association",
+    "name:pt": "Associação de Caridade Palestina Terra do Homem"
+  }
+},
+{
+  "type": "node",
+  "id": 5837946589,
+  "lat": 31.4168413,
+  "lon": 34.3493107,
+  "tags": {
+    "amenity": "clinic",
+    "name": "مركز صحي دير البلح",
+    "name:ar": "مركز صحي دير البلح"
+  }
+},
+{
+  "type": "node",
+  "id": 5837946991,
+  "lat": 31.4066394,
+  "lon": 34.3424830,
+  "tags": {
+    "amenity": "clinic",
+    "name": "عيادة حكر الجامع",
+    "name:ar": "عيادة حكر الجامع"
+  }
+},
+{
+  "type": "node",
+  "id": 6805031185,
+  "lat": 31.3370741,
+  "lon": 34.3454510,
+  "tags": {
+    "amenity": "hospital",
+    "name": "عيادة عبسان الصغيرة",
+    "name:ar": "عيادة عبسان الصغيرة"
+  }
+},
+{
+  "type": "node",
+  "id": 7632371785,
+  "lat": 31.3508295,
+  "lon": 34.2883927,
+  "tags": {
+    "amenity": "refugee_site",
+    "name": "مخيم خان يونس",
+    "name:ar": "مخيم خان يونس",
+    "name:en": "Khan Yunis Camp",
+    "name:fa": "اردوگاه پناهندگان خان‌یونس",
+    "name:ja": "ハーン・ユーニス難民キャンプ",
+    "place": "suburb",
+    "wikidata": "Q6400104"
+  }
+},
+{
+  "type": "node",
+  "id": 9863444123,
+  "lat": 31.4171849,
+  "lon": 34.3479101,
+  "tags": {
+    "addr:street": "Salah Khalaf Street",
+    "amenity": "clinic",
+    "name": "مختبر فراس الطبي"
+  }
+},
+{
+  "type": "node",
+  "id": 9894896017,
+  "lat": 31.3989442,
+  "lon": 34.3285615,
+  "tags": {
+    "amenity": "clinic",
+    "name": "مركز صحي البركة"
+  }
+},
+{
+  "type": "node",
+  "id": 11408821425,
+  "lat": 31.3550656,
+  "lon": 34.2610942,
+  "tags": {
+    "description": "Bedouin town on the southern coast of the Gaza Strip",
+    "name": "المواصي",
+    "name:ar": "المواصي",
+    "name:en": "Al-Mawasi",
+    "name:fa": "مواصی",
+    "name:he": "אל-מַוַ֫ואסִי",
+    "name:ml": "അൽ മവാസി",
+    "place": "village",
+    "population": "1409",
+    "population:date": "2006",
+    "source:population": "wikipedia",
+    "wikidata": "Q4702878",
+    "wikipedia": "ar:المواصي (رفح)",
+    "wikipedia:ar": "المواصي (رفح)",
+    "wikipedia:en": "Al-Mawasi"
+  }
+},
+{
+  "type": "node",
+  "id": 12497580906,
+  "lat": 31.3861504,
+  "lon": 34.2927757,
+  "tags": {
+    "amenity": "clinic",
+    "name": "اطباء بلا حدود بلجيكا"
+  }
+},
+{
+  "type": "node",
+  "id": 13688181301,
+  "lat": 31.3762985,
+  "lon": 34.3029159,
+  "tags": {
+    "addr:street": "تقاطع ش البحر اصداء",
+    "amenity": "marketplace",
+    "name": "بوابة اصداء الشمالية"
+  }
+},
+{
+  "type": "node",
+  "id": 13751777401,
+  "lat": 31.3664873,
+  "lon": 34.2718751,
+  "tags": {
+    "amenity": "hospital",
+    "name": "الهلال الميداني"
+  }
+},
+{
+  "type": "way",
+  "id": 41304734,
+  "center": {
+    "lat": 31.3989480,
+    "lon": 34.3285156
+  },
+  "tags": {
+    "amenity": "hospital",
+    "name": "Al Berka Medical Center",
+    "name:ar": "مركز البركة الطبي"
+  }
+},
+{
+  "type": "way",
+  "id": 41305784,
+  "center": {
+    "lat": 31.4199699,
+    "lon": 34.3599878
+  },
+  "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "مستشفى شهداء الأقصى",
+    "name:ar": "مستشفى شهداء الأقصى",
+    "name:en": "Shohadaa al'Aqsa",
+    "name:ja": "アル＝アクサ殉教者病院",
+    "name:tr": "Mescid-i Aksa Şehitleri Hastanesi",
+    "source": "Pleiades 20140706, CNES, Airbus Defense and Space",
+    "source:hospital": "http://www.openstreetmap.org/user/JumpStart International"
+  }
+},
+{
+  "type": "way",
+  "id": 41307514,
+  "center": {
+    "lat": 31.4168501,
+    "lon": 34.3493417
+  },
+  "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "Al-Balad Medical Clinic",
+    "name:ar": "عيادة البلد"
+  }
+},
+{
+  "type": "way",
+  "id": 41308659,
+  "center": {
+    "lat": 31.4181887,
+    "lon": 34.3452159
+  },
+  "tags": {
+    "amenity": "hospital",
+    "name": "Yafa Hospital",
+    "name:ar": "مستشفى يافا الطبي",
+    "name:ja": "ヤッファ病院"
+  }
+},
+{
+  "type": "way",
+  "id": 41315666,
+  "center": {
+    "lat": 31.3560566,
+    "lon": 34.2754127
+  },
+  "tags": {
+    "amenity": "university",
+    "name": "جامعة الأقصى Al-Aqsa University",
+    "name:ar": "جامعة الأقصى",
+    "name:en": "Al-Aqsa University",
+    "name:he": "אוניברסיטת אל־אקצא",
+    "name:ja": "アル＝アクサ大学",
+    "name:tr": "Mescid-i Aksa Üniversitesi"
+  }
+},
+{
+  "type": "way",
+  "id": 41316303,
+  "center": {
+    "lat": 31.3431318,
+    "lon": 34.3053031
+  },
+  "tags": {
+    "highway": "tertiary",
+    "junction": "roundabout",
+    "lanes": "4",
+    "maxspeed": "50",
+    "median": "yes",
+    "name": "دوار السنية",
+    "name:ar": "دوار السنية",
+    "name:en": "Al Sonya Sq.",
+    "name:fa": "میدان سونیا",
+    "surface": "asphalt",
+    "width": "12"
+  }
+},
+{
+  "type": "way",
+  "id": 41318229,
+  "center": {
+    "lat": 31.3470268,
+    "lon": 34.2922939
+  },
+  "tags": {
+    "amenity": "hospital",
+    "emergency": "yes",
+    "healthcare": "hospital",
+    "name": "مجمع ناصر الطبى",
+    "name:ar": "مجمع ناصر الطبى",
+    "name:en": "Nasser Hospital",
+    "name:ja": "ナセル病院",
+    "name:tr": "Nasır Hastanesi"
+  }
+},
+{
+  "type": "way",
+  "id": 41318316,
+  "center": {
+    "lat": 31.3504579,
+    "lon": 34.2893110
+  },
+  "tags": {
+    "amenity": "clinic",
+    "building": "yes",
+    "healthcare": "clinic",
+    "name": "Medical Care Center",
+    "name:ar": "مركز الرعاية الطبية"
+  }
+},
+{
+  "type": "way",
+  "id": 41318435,
+  "center": {
+    "lat": 31.3426871,
+    "lon": 34.3252275
+  },
+  "tags": {
+    "highway": "tertiary",
+    "junction": "roundabout",
+    "lanes": "2",
+    "maxspeed": "50",
+    "median": "yes",
+    "name": "Bani Suhaila Roundabout",
+    "name:ar": "دوار بني سهيلا",
+    "oneway": "yes",
+    "surface": "paved",
+    "width": "6"
+  }
+},
+{
+  "type": "way",
+  "id": 41318615,
+  "center": {
+    "lat": 31.3434744,
+    "lon": 34.3079917
+  },
+  "tags": {
+    "highway": "tertiary",
+    "junction": "roundabout",
+    "lanes": "2",
+    "name": "Abo Hmeid RoundAbout",
+    "name:fa": "میدان ابوحمید",
+    "surface": "asphalt",
+    "width": "12"
+  }
+},
+{
+  "type": "way",
+  "id": 41318918,
+  "center": {
+    "lat": 31.3520107,
+    "lon": 34.2976744
+  },
+  "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "مركز الهلال",
+    "name:ar": "مركز الهلال",
+    "name:en": "Al Hilal Centre",
+    "name:ja": "アル＝ヒラルセンター",
+    "name:pt": "Centro Al-Hilal"
+  }
+},
+{
+  "type": "way",
+  "id": 197337332,
+  "center": {
+    "lat": 31.3599015,
+    "lon": 34.2750297
+  },
+  "tags": {
+    "highway": "tertiary",
+    "junction": "roundabout",
+    "name": "دوار الأقصي",
+    "name:ar": "دوار الأقصي",
+    "name:en": "Al-Aqsa Sq.",
+    "name:fa": "میدان الاقصی"
+  }
+},
+{
+  "type": "way",
+  "id": 295791271,
+  "center": {
+    "lat": 31.3493688,
+    "lon": 34.2912975
+  },
+  "tags": {
+    "highway": "tertiary",
+    "junction": "roundabout",
+    "maxspeed": "40",
+    "median": "yes",
+    "name": "El Baheer Sq.",
+    "name:ar": "دوار البحر",
+    "name:en": "El Baheer Sq.",
+    "name:fa": "میدان البحر",
+    "oneway": "yes",
+    "surface": "asphalt",
+    "width": "16"
+  }
+},
+{
+  "type": "way",
+  "id": 295891984,
+  "center": {
+    "lat": 31.3503053,
+    "lon": 34.2901426
+  },
+  "tags": {
+    "amenity": "clinic",
+    "building": "yes",
+    "healthcare": "clinic",
+    "name": "Khanyounis Health Care center"
+  }
+},
+{
+  "type": "way",
+  "id": 295965984,
+  "center": {
+    "lat": 31.4247351,
+    "lon": 34.3382302
+  },
+  "tags": {
+    "amenity": "clinic",
+    "building": "yes",
+    "healthcare": "clinic",
+    "name": "Deir Elbalah health center"
+  }
+},
+{
+  "type": "way",
+  "id": 299167204,
+  "center": {
+    "lat": 31.3621427,
+    "lon": 34.2948101
+  },
+  "tags": {
+    "amenity": "clinic",
+    "building": "yes",
+    "healthcare": "clinic",
+    "name": "Japanese clinic"
+  }
+},
+{
+  "type": "way",
+  "id": 306011996,
+  "center": {
+    "lat": 31.3439484,
+    "lon": 34.3034309
+  },
+  "tags": {
+    "amenity": "clinic",
+    "building": "yes",
+    "healthcare": "clinic",
+    "name": "عيادة الدكتور عبد الفتاح رمضان الأغا",
+    "name:ar": "عيادة الدكتور عبد الفتاح رمضان الأغا",
+    "name:en": "Dr. Abdul Fattah R Alagha",
+    "source": "Pleiades 20140706, CNES, Airbus Defense and Space"
+  }
+},
+{
+  "type": "way",
+  "id": 1016555015,
+  "center": {
+    "lat": 31.3036270,
+    "lon": 34.3198462
+  },
+  "tags": {
+    "amenity": "hospital",
+    "emergency": "yes",
+    "healthcare": "hospital",
+    "name": "مستشفى غزة الأوروبي",
+    "name:en": "European Gaza Hospital",
+    "name:ja": "ガザヨーロッパ病院",
+    "name:ku": "Nexweşxaneya Gaza Ewropayê",
+    "name:pl": "Szpital Europejski Gaza",
+    "name:tr": "Avrupa Gazze Hastanesi",
+    "phone": "(+970) 8- 2054495",
+    "website": "http://www.egh.gov.ps/",
+    "wikidata": "Q90495300"
+  }
+},
+{
+  "type": "way",
+  "id": 1124115103,
+  "center": {
+    "lat": 31.3481606,
+    "lon": 34.3028922
+  },
+  "tags": {
+    "amenity": "clinic",
+    "building": "yes",
+    "healthcare": "clinic",
+    "name": "عيادة القدس الخيرية",
+    "name:ar": "عيادة القدس الخيرية"
+  }
+}
+
+  ]
+}

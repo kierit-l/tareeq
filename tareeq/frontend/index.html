@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>طريق — حالة الطرق والتنقل في غزة</title>
+<link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="logo">طريق</span>
+    <span class="tag" data-en="Can I get there safely today? <small>Tareeq · Gaza road status &amp; trip times</small>">هل أستطيع الوصول بأمان اليوم؟ <small>Tareeq · Gaza road status &amp; trip times</small></span>
+  </div>
+  <div class="hdr-right"><button id="langtoggle" class="langtoggle" title="Language / اللغة">English</button>
+  <div class="clock" id="clock" title="Simulated clock">—</div></div>
+</header>
+
+<main>
+  <!-- right column (RTL first): route planner + demo controls -->
+  <aside class="panel" id="side">
+    <div class="netbar" id="netbar" hidden></div>
+    <section class="card">
+      <h2 data-en="Plan a trip">خطط رحلتك <small>Plan a trip</small></h2>
+      <label><span data-en="From">من <small>From</small></span><input id="from" list="placelist" value="المواصي" autocomplete="off"></label>
+      <label><span data-en="To">إلى <small>To</small></span><input id="to" list="placelist" value="مستشفى ناصر" autocomplete="off"></label>
+      <datalist id="placelist"></datalist>
+      <div class="modes">
+        <label><input type="checkbox" value="tuktuk" checked> <span data-en="Tuk-tuk">توكتوك</span></label>
+        <label><input type="checkbox" value="trailer" checked> <span data-en="Trailer">مقطورة</span></label>
+        <label><input type="checkbox" value="cart" checked> <span data-en="Donkey cart">عربة</span></label>
+        <label title="Wheelchair / stretcher"><input type="checkbox" id="accessible"> <span data-en="Wheelchair / stretcher">كرسي متحرك</span></label>
+      </div>
+      <button id="go" class="primary" data-en="Find a route">ابحث عن طريق</button>
+    </section>
+
+    <section class="card" id="result" hidden></section>
+
+    <section class="card" id="saved" hidden>
+      <h2 data-en="My saved trips <small>Available offline</small>">رحلاتي المحفوظة <small>Saved for offline</small></h2>
+      <p class="note" data-en="Works without internet: the map and route are stored on your phone. We never track your location.">تعمل بدون إنترنت: الخريطة والطريق محفوظان على هاتفك. لا نتتبع موقعك.</p>
+      <ul class="saved" id="savedlist"></ul>
+    </section>
+
+    <section class="card demo">
+      <h2 data-en="Demo controls">لوحة العرض <small>Demo controls</small></h2>
+      <div class="row">
+        <button data-clock="1" data-en="+1 hour">+١ ساعة</button>
+        <button data-clock="6" data-en="+6 hours">+٦ ساعات</button>
+      </div>
+      <label class="fuel"><span data-en="Fuel scarcity index">مؤشر الوقود <small>Fuel scarcity</small></span>
+        <input type="range" id="fuel" min="1" max="2" step="0.1" value="1"><output id="fuelv" data-en="1.0×">١٫٠×</output>
+      </label>
+      <label class="switch"><input type="checkbox" id="evac"> <span data-en="New evacuation order (illustrative)">أمر إخلاء جديد (توضيحي) <small>New evacuation order</small></span></label>
+      <label class="switch"><input type="checkbox" id="trusted"> <span data-en="Report as trusted reporter">أبلغ كمراسل موثوق <small>Report as trusted reporter</small></span></label>
+      <button id="reset" class="ghost" data-en="Reset demo">إعادة الضبط <small>Reset</small></button>
+      <h3 data-en="What changed">ما الذي تغيّر <small>What changed</small></h3>
+      <ul id="changes" class="changes"><li class="muted">لا تغييرات بعد</li></ul>
+    </section>
+  </aside>
+
+  <div id="map"></div>
+
+  <!-- left column: SMS / WhatsApp simulator -->
+  <aside class="phone-wrap">
+    <div class="phone">
+      <div class="phone-top"><span data-en="SMS messages">رسائل SMS</span> · <span id="sender">+970-59-xxx</span></div>
+      <div class="chat" id="chat"></div>
+      <div class="chips" id="chips">
+        <button>طريق المواصي مستشفى ناصر</button>
+        <button>من دير البلح الى خانيونس</button>
+        <button>مغلق دوار بني سهيلا</button>
+        <button>تنبيه المواصي ناصر</button>
+        <button>مساعدة</button>
+      </div>
+      <form id="smsform"><input id="smsin" placeholder="اكتب رسالة…" data-en-ph="Type a message…" autocomplete="off"><button data-en="Send">إرسال</button></form>
+    </div>
+  </aside>
+</main>
+
+<div class="legend" id="legend"></div>
+<footer><span data-en="Illustrative demo data only. Conditions change fast; official evacuation orders always take priority.">بيانات توضيحية للعرض فقط. الظروف تتغير بسرعة؛ أوامر الإخلاء الرسمية لها الأولوية دائماً.</span>
+  <small>Demo data. Roads: © OpenStreetMap (ODbL). Damage prior: UNOSAT/UN-Habitat 2024 (CC BY-SA). No-go polygons are illustrative.</small></footer>
+
+<script src="/static/vendor/leaflet/leaflet.js"></script>
+<script src="/static/vendor/protomaps-leaflet/protomaps-leaflet.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

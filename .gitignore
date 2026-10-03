@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# runtime state (never commit reports, subscriptions or caches)
+*.db
+*.db-journal
+tareeq/data/tiles/
+tareeq/data/strikes/
+.env
+
+# duplicate of data/raw/unosat/*.gdb
+tareeq/data/raw/unosat_roads.zip
+
+.DS_Store

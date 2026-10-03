@@ -1,0 +1,444 @@
+[
+ {
+  "name": "دير البلح",
+  "en": "Deir el-Balah",
+  "lon": 34.3502476,
+  "lat": 31.4183455,
+  "kind": "town",
+  "aliases": [
+   "الدير",
+   "دير البلح البلد",
+   "Deir al-Balah"
+  ],
+  "node": 505041845,
+  "snap_m": 45
+ },
+ {
+  "name": "مخيّم دير البلح",
+  "en": "Deir al-Balah Refugee Camp",
+  "lon": 34.3401033,
+  "lat": 31.4247734,
+  "kind": "refugee_site",
+  "aliases": [
+   "مخيم الدير",
+   "مخيم دير البلح",
+   "معسكر الدير"
+  ],
+  "node": 505025741,
+  "snap_m": 22
+ },
+ {
+  "name": "القرارة",
+  "en": "al-Qarara",
+  "lon": 34.3355147,
+  "lat": 31.3782508,
+  "kind": "town",
+  "aliases": [
+   "قرارة",
+   "Qarara"
+  ],
+  "node": 9350697470,
+  "snap_m": 56
+ },
+ {
+  "name": "حارة أم ظهير",
+  "en": "Am Dhair",
+  "lon": 34.3381461,
+  "lat": 31.4000485,
+  "kind": "village",
+  "aliases": [],
+  "node": 11766156340,
+  "snap_m": 64
+ },
+ {
+  "name": "مدينة حمد",
+  "en": "Hamad Town",
+  "lon": 34.3192758,
+  "lat": 31.3762177,
+  "kind": "neighbourhood",
+  "aliases": [
+   "حمد",
+   "أبراج حمد",
+   "Hamad City"
+  ],
+  "node": 5775702792,
+  "snap_m": 54
+ },
+ {
+  "name": "عيادة خان يونس",
+  "en": "Khanyounis Health Care center",
+  "lon": 34.2900367,
+  "lat": 31.3502267,
+  "kind": "clinic",
+  "aliases": [],
+  "node": 11380436813,
+  "snap_m": 33
+ },
+ {
+  "name": "عيادة الصفا",
+  "en": null,
+  "lon": 34.3039146,
+  "lat": 31.3434472,
+  "kind": "clinic",
+  "aliases": [],
+  "node": 11940469597,
+  "snap_m": 32
+ },
+ {
+  "name": "جمعية أرض الإنسان الفلسطينية الخيرية",
+  "en": "Ard Al Insan Palestinian Association",
+  "lon": 34.293889,
+  "lat": 31.3555064,
+  "kind": "clinic",
+  "aliases": [],
+  "node": 505118975,
+  "snap_m": 25
+ },
+ {
+  "name": "مركز صحي دير البلح",
+  "en": null,
+  "lon": 34.3493107,
+  "lat": 31.4168413,
+  "kind": "clinic",
+  "aliases": [],
+  "node": -815,
+  "snap_m": 54
+ },
+ {
+  "name": "عيادة حكر الجامع",
+  "en": null,
+  "lon": 34.342483,
+  "lat": 31.4066394,
+  "kind": "clinic",
+  "aliases": [],
+  "node": 505043129,
+  "snap_m": 59
+ },
+ {
+  "name": "عيادة عبسان الصغيرة",
+  "en": null,
+  "lon": 34.345451,
+  "lat": 31.3370741,
+  "kind": "hospital",
+  "aliases": [],
+  "node": 505092932,
+  "snap_m": 81
+ },
+ {
+  "name": "مخيم خان يونس",
+  "en": "Khan Yunis Camp",
+  "lon": 34.2883927,
+  "lat": 31.3508295,
+  "kind": "refugee_site",
+  "aliases": [
+   "مخيم خانيونس",
+   "معسكر خانيونس",
+   "Khan Younis Camp"
+  ],
+  "node": 11380436817,
+  "snap_m": 14
+ },
+ {
+  "name": "مختبر فراس الطبي",
+  "en": null,
+  "lon": 34.3479101,
+  "lat": 31.4171849,
+  "kind": "clinic",
+  "aliases": [],
+  "node": 505036865,
+  "snap_m": 8
+ },
+ {
+  "name": "مركز صحي البركة",
+  "en": null,
+  "lon": 34.3285615,
+  "lat": 31.3989442,
+  "kind": "clinic",
+  "aliases": [],
+  "node": -29,
+  "snap_m": 49
+ },
+ {
+  "name": "المواصي",
+  "en": "Al-Mawasi",
+  "lon": 34.2610942,
+  "lat": 31.3550656,
+  "kind": "village",
+  "aliases": [
+   "مواصي",
+   "مواصي خانيونس",
+   "Mawasi"
+  ],
+  "node": 505101982,
+  "snap_m": 21
+ },
+ {
+  "name": "اطباء بلا حدود بلجيكا",
+  "en": null,
+  "lon": 34.2927757,
+  "lat": 31.3861504,
+  "kind": "clinic",
+  "aliases": [],
+  "node": -250,
+  "snap_m": 101
+ },
+ {
+  "name": "بوابة اصداء الشمالية",
+  "en": null,
+  "lon": 34.3029159,
+  "lat": 31.3762985,
+  "kind": "marketplace",
+  "aliases": [],
+  "node": 2994338103,
+  "snap_m": 7
+ },
+ {
+  "name": "الهلال الميداني",
+  "en": null,
+  "lon": 34.2718751,
+  "lat": 31.3664873,
+  "kind": "hospital",
+  "aliases": [],
+  "node": -561,
+  "snap_m": 71
+ },
+ {
+  "name": "مركز البركة الطبي",
+  "en": null,
+  "lon": 34.3285156,
+  "lat": 31.398948,
+  "kind": "hospital",
+  "aliases": [],
+  "node": -29,
+  "snap_m": 52
+ },
+ {
+  "name": "مستشفى شهداء الأقصى",
+  "en": "Shohadaa al'Aqsa",
+  "lon": 34.3599878,
+  "lat": 31.4199699,
+  "kind": "hospital",
+  "aliases": [
+   "مستشفى الأقصى",
+   "شهداء الأقصى",
+   "الأقصى",
+   "Al-Aqsa Hospital"
+  ],
+  "node": -298,
+  "snap_m": 64
+ },
+ {
+  "name": "عيادة البلد",
+  "en": null,
+  "lon": 34.3493417,
+  "lat": 31.4168501,
+  "kind": "hospital",
+  "aliases": [],
+  "node": -815,
+  "snap_m": 55
+ },
+ {
+  "name": "مستشفى يافا الطبي",
+  "en": null,
+  "lon": 34.3452159,
+  "lat": 31.4181887,
+  "kind": "hospital",
+  "aliases": [],
+  "node": 505038022,
+  "snap_m": 38
+ },
+ {
+  "name": "جامعة الأقصى",
+  "en": "Al-Aqsa University",
+  "lon": 34.2754127,
+  "lat": 31.3560566,
+  "kind": "university",
+  "aliases": [
+   "الجامعة",
+   "Al-Aqsa University"
+  ],
+  "node": -799,
+  "snap_m": 265
+ },
+ {
+  "name": "دوار السنية",
+  "en": "Al Sonya Sq.",
+  "lon": 34.3053031,
+  "lat": 31.3431318,
+  "kind": "roundabout",
+  "aliases": [
+   "السنية"
+  ],
+  "node": 505124450,
+  "snap_m": 12
+ },
+ {
+  "name": "مجمع ناصر الطبى",
+  "en": "Nasser Hospital",
+  "lon": 34.2922939,
+  "lat": 31.3470268,
+  "kind": "hospital",
+  "aliases": [
+   "مستشفى ناصر",
+   "ناصر",
+   "مجمع ناصر",
+   "Nasser"
+  ],
+  "node": 11350235449,
+  "snap_m": 76
+ },
+ {
+  "name": "مركز الرعاية الطبية",
+  "en": null,
+  "lon": 34.289311,
+  "lat": 31.3504579,
+  "kind": "clinic",
+  "aliases": [],
+  "node": 505097174,
+  "snap_m": 33
+ },
+ {
+  "name": "دوار بني سهيلا",
+  "en": null,
+  "lon": 34.3252275,
+  "lat": 31.3426871,
+  "kind": "roundabout",
+  "aliases": [
+   "بني سهيلا",
+   "Bani Suheila roundabout"
+  ],
+  "node": 505120859,
+  "snap_m": 11
+ },
+ {
+  "name": "Abo Hmeid RoundAbout",
+  "en": null,
+  "lon": 34.3079917,
+  "lat": 31.3434744,
+  "kind": "roundabout",
+  "aliases": [],
+  "node": 505115349,
+  "snap_m": 14
+ },
+ {
+  "name": "مركز الهلال",
+  "en": "Al Hilal Centre",
+  "lon": 34.2976744,
+  "lat": 31.3520107,
+  "kind": "hospital",
+  "aliases": [],
+  "node": -855,
+  "snap_m": 59
+ },
+ {
+  "name": "دوار الأقصي",
+  "en": "Al-Aqsa Sq.",
+  "lon": 34.2750297,
+  "lat": 31.3599015,
+  "kind": "roundabout",
+  "aliases": [],
+  "node": 2075902737,
+  "snap_m": 25
+ },
+ {
+  "name": "دوار البحر",
+  "en": "El Baheer Sq.",
+  "lon": 34.2912975,
+  "lat": 31.3493688,
+  "kind": "roundabout",
+  "aliases": [],
+  "node": 2995502191,
+  "snap_m": 9
+ },
+ {
+  "name": "Khanyounis Health Care center",
+  "en": null,
+  "lon": 34.2901426,
+  "lat": 31.3503053,
+  "kind": "clinic",
+  "aliases": [],
+  "node": 11380436813,
+  "snap_m": 46
+ },
+ {
+  "name": "Deir Elbalah health center",
+  "en": null,
+  "lon": 34.3382302,
+  "lat": 31.4247351,
+  "kind": "clinic",
+  "aliases": [],
+  "node": 505021481,
+  "snap_m": 25
+ },
+ {
+  "name": "Japanese clinic",
+  "en": null,
+  "lon": 34.2948101,
+  "lat": 31.3621427,
+  "kind": "clinic",
+  "aliases": [],
+  "node": 11853880310,
+  "snap_m": 66
+ },
+ {
+  "name": "عيادة الدكتور عبد الفتاح رمضان الأغا",
+  "en": "Dr. Abdul Fattah R Alagha",
+  "lon": 34.3034309,
+  "lat": 31.3439484,
+  "kind": "clinic",
+  "aliases": [],
+  "node": 505119629,
+  "snap_m": 43
+ },
+ {
+  "name": "مستشفى غزة الأوروبي",
+  "en": "European Gaza Hospital",
+  "lon": 34.3198462,
+  "lat": 31.303627,
+  "kind": "hospital",
+  "aliases": [
+   "الأوروبي",
+   "المستشفى الأوروبي",
+   "European Hospital"
+  ],
+  "node": 505092344,
+  "snap_m": 167
+ },
+ {
+  "name": "عيادة القدس الخيرية",
+  "en": null,
+  "lon": 34.3028922,
+  "lat": 31.3481606,
+  "kind": "clinic",
+  "aliases": [],
+  "node": 505093326,
+  "snap_m": 33
+ },
+ {
+  "name": "خان يونس",
+  "en": "Khan Younis",
+  "lon": 34.3063,
+  "lat": 31.344,
+  "kind": "town",
+  "aliases": [
+   "خانيونس",
+   "خان يونس البلد",
+   "Khan Younis"
+  ],
+  "node": 505129437,
+  "snap_m": 42
+ },
+ {
+  "name": "مستشفى الصليب الأحمر الميداني",
+  "en": "ICRC field hospital (Rafah/Mawasi)",
+  "lon": 34.2556,
+  "lat": 31.319,
+  "kind": "hospital",
+  "aliases": [
+   "الصليب الأحمر",
+   "ICRC"
+  ],
+  "node": 11955379903,
+  "snap_m": 350
+ }
+]

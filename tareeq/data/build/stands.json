@@ -1,0 +1,173 @@
+[
+ {
+  "id": "st1",
+  "name": "موقف دوار بني سهيلا",
+  "place": "دوار بني سهيلا",
+  "node": 505120859,
+  "lon": 34.3252275,
+  "lat": 31.3426871,
+  "modes": [
+   "trailer",
+   "tuktuk",
+   "cart"
+  ],
+  "wait_median_min": 12,
+  "base_fare_ils": 4
+ },
+ {
+  "id": "st2",
+  "name": "موقف مجمع ناصر الطبى",
+  "place": "مجمع ناصر الطبى",
+  "node": 11350235449,
+  "lon": 34.2922939,
+  "lat": 31.3470268,
+  "modes": [
+   "trailer",
+   "tuktuk"
+  ],
+  "wait_median_min": 8,
+  "base_fare_ils": 4
+ },
+ {
+  "id": "st3",
+  "name": "موقف خان يونس",
+  "place": "خان يونس",
+  "node": 505129437,
+  "lon": 34.3063,
+  "lat": 31.344,
+  "modes": [
+   "trailer",
+   "tuktuk",
+   "cart"
+  ],
+  "wait_median_min": 10,
+  "base_fare_ils": 4
+ },
+ {
+  "id": "st4",
+  "name": "موقف المواصي",
+  "place": "المواصي",
+  "node": 505101982,
+  "lon": 34.2610942,
+  "lat": 31.3550656,
+  "modes": [
+   "trailer",
+   "tuktuk",
+   "cart"
+  ],
+  "wait_median_min": 15,
+  "base_fare_ils": 5
+ },
+ {
+  "id": "st5",
+  "name": "موقف دير البلح",
+  "place": "دير البلح",
+  "node": 505041845,
+  "lon": 34.3502476,
+  "lat": 31.4183455,
+  "modes": [
+   "trailer",
+   "tuktuk",
+   "cart"
+  ],
+  "wait_median_min": 10,
+  "base_fare_ils": 4
+ },
+ {
+  "id": "st6",
+  "name": "موقف مستشفى شهداء الأقصى",
+  "place": "مستشفى شهداء الأقصى",
+  "node": -298,
+  "lon": 34.3599878,
+  "lat": 31.4199699,
+  "modes": [
+   "trailer",
+   "tuktuk"
+  ],
+  "wait_median_min": 9,
+  "base_fare_ils": 4
+ },
+ {
+  "id": "st7",
+  "name": "موقف القرارة",
+  "place": "القرارة",
+  "node": 9350697470,
+  "lon": 34.3355147,
+  "lat": 31.3782508,
+  "modes": [
+   "tuktuk",
+   "cart"
+  ],
+  "wait_median_min": 18,
+  "base_fare_ils": 5
+ },
+ {
+  "id": "st8",
+  "name": "موقف دوار السنية",
+  "place": "دوار السنية",
+  "node": 505124450,
+  "lon": 34.3053031,
+  "lat": 31.3431318,
+  "modes": [
+   "tuktuk",
+   "cart"
+  ],
+  "wait_median_min": 14,
+  "base_fare_ils": 4
+ },
+ {
+  "id": "st9",
+  "name": "موقف مستشفى غزة الأوروبي",
+  "place": "مستشفى غزة الأوروبي",
+  "node": 505092344,
+  "lon": 34.3198462,
+  "lat": 31.303627,
+  "modes": [
+   "tuktuk"
+  ],
+  "wait_median_min": 20,
+  "base_fare_ils": 5
+ },
+ {
+  "id": "st10",
+  "name": "موقف مخيم خان يونس",
+  "place": "مخيم خان يونس",
+  "node": 11380436817,
+  "lon": 34.2883927,
+  "lat": 31.3508295,
+  "modes": [
+   "tuktuk",
+   "cart"
+  ],
+  "wait_median_min": 12,
+  "base_fare_ils": 4
+ },
+ {
+  "id": "st11",
+  "name": "موقف جامعة الأقصى",
+  "place": "جامعة الأقصى",
+  "node": -799,
+  "lon": 34.2754127,
+  "lat": 31.3560566,
+  "modes": [
+   "trailer",
+   "tuktuk"
+  ],
+  "wait_median_min": 12,
+  "base_fare_ils": 4
+ },
+ {
+  "id": "st12",
+  "name": "موقف مدينة حمد",
+  "place": "مدينة حمد",
+  "node": 5775702792,
+  "lon": 34.3192758,
+  "lat": 31.3762177,
+  "modes": [
+   "tuktuk",
+   "cart"
+  ],
+  "wait_median_min": 16,
+  "base_fare_ils": 5
+ }
+]
