@@ -83,6 +83,37 @@ Remaining production gaps:
 - W1 partial: the layout stacks to one column below 1100 px, but isn't designed for 360 px.
 - Not built: W4 offline report queue, W5 delta sync.
 
+### Build progress (3 Oct, night)
+
+- **Repo and tests (P3/P4):**
+  - Git repo at `EmberHack/`.
+  - `tareeq/tests` has 63 tests covering state rules, router safety invariants (never enters a buffer), the parser regression set, and the ops/strike flows.
+- **Operator console §4.6** (`/admin`):
+  - Zones are drawn on the map, need a cited source, and go live only after a second operator approves. Removal needs two operators too.
+  - Strike hazards with two-person dismissal.
+  - Review queue of provisional and contested segments plus field notes.
+  - Field-reporter access codes (issue/revoke), broadcasts with two-person approval, accuracy metrics, audit log.
+- **Field reporting page (new, `/field`):** Waze-style, mobile, AR/EN.
+  - One-tap kinds: clear, slow, rubble, crater, flood, foot only, blocked, checkpoint, unexploded ordnance (UXO), strike.
+  - "Still there / clear now" confirmations on any road.
+  - Offline queue that sends each report with its real age; the Strip basemap is stored up front.
+  - GPS is used only to snap the report to a road and is never stored. Reports from code holders count as trusted.
+  - Safety kinds close roads within 100–200 m at once.
+- **Recent strikes (new, `strikes.py`):** no free public feed gives precise, recent strike locations in Gaza (researched 3 Oct 2026).
+  - **NASA FIRMS** satellite fire detections become hazards: 450 m buffer, 48 h expiry, low-confidence points and points outside the Strip dropped. Expect few hits; FIRMS saw nothing in the corridor over the last 7 days.
+  - **GDELT** feeds only a Strip-wide activity signal, because its "Gaza (general)" point sits inside the corridor.
+  - **Partner GeoJSON feed** supported for NGO or ACLED-partner data.
+  - **Fastest real source:** strike reports from field reporters.
+  - **Not usable:** ACLED (licence, weekly lag) and ReliefWeb (needs an approved app name).
+- **W1 phone layout:** done (single column below 700 px).
+- **W4 offline report queue:** done for `/field`.
+- **Still open:**
+  - real OCHA polygons (operators must enter them by hand; no machine-readable feed found)
+  - a live Twilio test
+  - hosting
+  - W5 delta sync
+  - P1 items (R3, R4, A4, A5)
+
 ## 2. Product goal (unchanged, sharpened)
 
 Answer **"Can I get from A to B safely today, how long will it take, and where do I catch a ride?"** in Arabic, over SMS first, with an honest range, age and confidence on every answer.
