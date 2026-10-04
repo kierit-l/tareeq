@@ -1,7 +1,7 @@
 # طريق Tareeq — Gaza road status & honest trip times
 
 Arabic-first, SMS-first service that answers **"Can I get there safely today, and how long will it really take?"**
-Built for the Deir al-Balah ↔ Khan Younis ↔ Al-Mawasi pilot corridor (see `../Gaza Transit Info — Product Spec.md`).
+Built for the Deir al-Balah ↔ Khan Younis ↔ Al-Mawasi pilot corridor (see `../Tareeq — Product Spec v2.md`; the original `../Gaza Transit Info — Product Spec.md` is kept for history).
 
 > Demo build. Driver/rider reports, fares and wait times are **simulated**. No-go polygons are **illustrative, not real safety data**.
 
@@ -26,6 +26,8 @@ Optional: `export ANTHROPIC_API_KEY=...` turns on Claude parsing of free-form Ar
 | Road graph | OpenStreetMap via Overpass (Oct 2026), split into 7,325 segments of ≤250 m |
 | Damage prior | UNOSAT/UN-Habitat road damage assessment (imagery 2024-05-29): crater, debris, destroyed… mapped to Degraded / Foot-only priors at low confidence |
 | Places | OSM hospitals, clinics, camps, roundabouts + residents' aliases ("ناصر", "مواصي", "الدير") |
+| Basemap | Protomaps extract of Gaza (`data/build/gaza.pmtiles`), served from `/map/gaza.pmtiles`, so no third-party tile server is hit |
+| Strike hazards | NASA FIRMS fire detections, GDELT and an optional partner feed (`backend/strikes.py`), turned into expiring no-go zones |
 
 ## How it works
 
@@ -43,6 +45,7 @@ channels: web map (RTL) · SMS simulator · /api/twilio webhook (SMS/WhatsApp)
 - **Safety:** official no-go polygons + 300 m buffer are excluded and can't be overridden; reports claiming they're passable are rejected. Crowd reports can only make roads *less* safe.
 - **Misinformation:** one reporter at places implying >80 km/h travel is ignored; daily-rotating salted reporter hashes count independence without tracking anyone.
 - **Privacy:** no GPS trails, no device IDs, timestamps floored to 5 min, no crowd counts at stands, raw reports purged after 14 days.
+- **Offline:** the service worker (`sw.js`, registered by the map and `/field`) caches the page, the basemap and saved trips, so a saved route still opens with no connection.
 - **Trip time:** wait (stand × hour × fuel) + ride (mode × state × hour) + walk, 400-sample Monte Carlo with per-leg correlated noise → P50–P85 range, wider when evidence is weak.
 
 ## SMS grammar
@@ -75,8 +78,10 @@ Unknown places get the 3 closest matches; a missing origin or destination gets "
 ## API
 
 `GET /api/route?frm=&to=&modes=tuktuk,cart&accessible=true` · `POST /api/sms {text,sender}` · `POST /api/report {segment|place|lon,lat, state, reporter, trusted}` ·
-`GET /api/states` (compact delta-friendly table) · `GET /api/alerts?sender=` · `GET /api/changes` · `POST /api/clock {hours}` · `POST /api/signals {fuel_index}` ·
-`POST /api/nogo/{id} {active}` · `POST /api/reset` · `POST /api/twilio` (form: Body, From)
+`GET /api/segments` · `GET /api/states` (compact delta-friendly table) · `GET /api/places` · `GET /api/nogo` · `GET /api/alerts?sender=` · `GET /api/changes` · `GET /api/metrics` ·
+`POST /api/clock {hours}` · `POST /api/signals {fuel_index}` · `POST /api/nogo/{id} {active}` · `POST /api/reset` · `POST /api/twilio` (form: Body, From)
+
+Operator console and field reporting live under `/api/ops/admin/*` (zones, strikes, reporters, queue, overview, audit, broadcasts) and `/api/ops/field/*` (`me`, `report`, `area`); see `backend/ops.py`.
 
 ## Demo vs production
 
