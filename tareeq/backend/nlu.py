@@ -43,6 +43,9 @@ REPORT_WORDS = {
     "unsafe": ["خطر", "خطير", "قصف", "استهداف", "danger", "unsafe"],
 }
 ROUTE_WORDS = ["طريق", "route", "من", "كيف اروح", "بدي اروح"]
+# walking route: "مشي من الدير الى ناصر", "walk Mawasi to Nasser", "طريق المواصي ناصر مشي". A single place after
+# مشي stays a foot_only report ("مشي دوار البحر").
+WALK_WORDS = ["مشي", "ماشي", "مشيا", "على الاقدام", "عالاقدام", "walk", "walking", "on foot", "by foot"]
 SEPARATORS = r"\s+(?:الى|الي|إلى|لعند|ل|to|->|←|→)\s+|\s*[-،,]\s*"
 ALERT_WORDS = ["تنبيه", "نبهني", "alert", "اشتراك"]
 HELP_WORDS = ["مساعده", "help", "?", "؟"]
@@ -139,6 +142,7 @@ def dialect(t):
     """Levantine contractions: عالمستشفى -> المستشفى, للمواصي -> المواصي, ع المواصي -> المواصي."""
     t = re.sub(r"(^|\s)عال", r"\1ال", t)
     t = re.sub(r"(^|\s)لل", r"\1ال", t)
+    t = re.sub(r"^(?:على|علي|لعند|عند)\s+", "", t)   # "على ناصر من الدير" -> "ناصر من الدير"
     return re.sub(r"(^|\s)ع\s+", r"\1", t)
 
 
@@ -174,6 +178,11 @@ def rule_parse(text, gaz: Gazetteer):
         a, b = gaz.split_two(" ".join(words[1:]))
         if a and b:
             return {"intent": "alert", "from": a, "to": b}
+    rest, walk = strip_walk(t, trailing=False)
+    if walk:
+        a, b = gaz.split_two(re.sub(r"^من\s+", "", dialect(rest)))
+        if a and b:
+            return {"intent": "route", "from": a, "to": b, "modes": ["foot"]}
     for state, kws in REPORT_WORDS.items():
         for kw in kws:
             k = norm(kw)
@@ -189,20 +198,31 @@ def rule_parse(text, gaz: Gazetteer):
     for kw in ROUTE_WORDS:
         k = norm(kw)
         if t.startswith(k + " "):
-            rest = dialect(t[len(k) + 1:])
+            rest, walk = strip_walk(dialect(t[len(k) + 1:]))
+            foot = {"modes": ["foot"]} if walk else {}
             # "<dest> من <origin>" (e.g. "بدي اروح عالأوروبي من المواصي"): a mid-sentence من marks the origin
             m = re.match(r"^(?:الى\s+|لعند\s+)?(.+?)\s+من\s+(.+)$", rest)
             if m:
                 b, sb = gaz.match(m.group(1))
                 a, sa = gaz.match(m.group(2))
                 if a and b:
-                    return {"intent": "route", "from": a, "to": b}
+                    return {"intent": "route", "from": a, "to": b} | foot
             rest = re.sub(r"^من\s+", "", rest)
             a, b = gaz.split_two(rest)
             if a and b:
-                return {"intent": "route", "from": a, "to": b}
+                return {"intent": "route", "from": a, "to": b} | foot
             return clarify_route(rest, gaz)
     return None
+
+
+def strip_walk(t, trailing=True):
+    """('walk mawasi to nasser') -> ('mawasi to nasser', True); a walk word may lead or trail."""
+    for w in sorted((norm(w) for w in WALK_WORDS), key=len, reverse=True):
+        if t.startswith(w + " "):
+            return t[len(w) + 1:], True
+        if trailing and t.endswith(" " + w):
+            return t[: -len(w) - 1], True
+    return t, False
 
 
 def clarify_route(rest, gaz):

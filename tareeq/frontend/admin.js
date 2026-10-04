@@ -12,28 +12,16 @@ const agoMin = (m) => m == null ? "—" : m < 60 ? T(`قبل ${m} د`, `${m} min
 $("lang").textContent = EN ? "ع" : "EN";
 $("lang").onclick = () => { localStorage.setItem("tareeq.lang", EN ? "ar" : "en"); location.reload(); };
 
-let token = sessionStorage.getItem("tareeq.op.token"), me = null, demo = false;
+let me = localStorage.getItem("tareeq.op.name") || "", demo = false;
 async function api(path, opts = {}) {
-  const r = await fetch(path, { ...opts, headers: { "Content-Type": "application/json", Authorization: "Bearer " + (token || "") },
+  const r = await fetch(path, { ...opts, headers: { "Content-Type": "application/json", "X-Operator": me },
                                body: opts.body ? JSON.stringify(opts.body) : undefined, cache: "no-store" });
   const d = await r.json().catch(() => ({}));
-  if (r.status === 401 && !path.endsWith("/login")) { signOut(); throw new Error("login required"); }
+  if (r.status === 401 && me) { localStorage.removeItem("tareeq.op.name"); me = ""; }
   if (!r.ok) throw new Error(d.detail || r.statusText);
   return d;
 }
 const act = async (fn) => { try { await fn(); } catch (e) { alert(e.message); } await render(); };
-
-// ---------------- sign in ----------------
-$("login").onsubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const r = await api("/api/ops/admin/login", { method: "POST", body: { name: $("lname").value.trim(), password: $("lpass").value } });
-    token = r.token; sessionStorage.setItem("tareeq.op.token", token); sessionStorage.setItem("tareeq.op.name", r.name);
-    start();
-  } catch (err) { $("lerr").textContent = err.message; }
-};
-function signOut() { sessionStorage.removeItem("tareeq.op.token"); token = null; location.reload(); }
-$("logout").onclick = signOut;
 
 // ---------------- map ----------------
 let map, layers, draft = null, mode = null;
@@ -266,18 +254,15 @@ $("content").addEventListener("change", (e) => {
 $("content").addEventListener("input", (e) => { if (e.target.id === "btext") $("bcount").textContent = `${e.target.value.length}/160`; });
 
 // ---------------- start ----------------
-async function start() {
-  $("login").hidden = true; $("app").hidden = false; $("logout").hidden = false;
-  me = sessionStorage.getItem("tareeq.op.name");
-  $("whoami").textContent = me;
-  if (!map) initMap();
-  ov = await api("/api/ops/admin/overview");
+// No login: pick who you are acting as. The two-person rule still needs a different name to approve.
+$("whoami").onchange = (e) => { me = e.target.value; localStorage.setItem("tareeq.op.name", me); render(); };
+(async function start() {
+  $("app").hidden = false;
+  initMap();
+  ov = await api("/api/ops/admin/overview").catch(() => api("/api/ops/admin/overview"));
+  me = ov.me;
+  $("whoami").innerHTML = ov.operators.map((n) => `<option${n === me ? " selected" : ""}>${esc(n)}</option>`).join("");
   demo = ov.demo; $("demoflag").hidden = !demo;
   await render();
   setInterval(() => { if (!mode) render().catch(() => {}); }, 30000);
-}
-(async function init() {
-  if (token) { try { await start(); return; } catch {} }
-  $("login").hidden = false;
-  $("ldemo").hidden = false;   // harmless outside demo: those logins only exist when TAREEQ_DEMO=1
 })();

@@ -22,7 +22,7 @@
   header { display: flex; justify-content: space-between; align-items: center; background: var(--bar); color: #fff; padding: 8px 14px; }
   header b { font-size: 20px; } header button { background: #22343f; color: #fff; border-color: #3a4f5c; }
   .demo-flag { background: #b26b00; border-radius: 6px; padding: 1px 8px; font-size: 12px; margin-inline-start: 8px; }
-  #login { max-width: 340px; margin: 12vh auto; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 2px 10px #0002; display: flex; flex-direction: column; gap: 10px; }
+  header select#whoami { width: auto; padding: 2px 6px; background: #22343f; color: #fff; border-color: #3a4f5c; }
   #app { display: grid; grid-template-columns: 480px 1fr; height: calc(100% - 46px); }
   #side { overflow-y: auto; border-inline-end: 1px solid var(--line); background: #fff; }
   nav { display: flex; flex-wrap: wrap; gap: 2px; padding: 6px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; z-index: 5; }
@@ -51,17 +51,8 @@
 <body>
 <header>
   <div><b>طريق</b> <span data-en="Operator console">لوحة التشغيل</span><span id="demoflag" class="demo-flag" hidden>DEMO</span></div>
-  <div><span id="whoami"></span> <button id="lang">EN</button> <button id="logout" hidden data-en="Sign out">خروج</button></div>
+  <div><select id="whoami" title="Acting as (two-person rule: switch to approve someone else's proposal)"></select> <button id="lang">EN</button></div>
 </header>
-
-<form id="login" hidden>
-  <h3 data-en="Operator sign in">دخول المشغّل</h3>
-  <input id="lname" placeholder="name" dir="ltr" autocomplete="username">
-  <input id="lpass" type="password" placeholder="password" dir="ltr" autocomplete="current-password">
-  <button class="primary" data-en="Sign in">دخول</button>
-  <div class="err" id="lerr"></div>
-  <small id="ldemo" hidden>Demo: amal / demo · omar / demo — <span data-en="sign in as each in two browsers to try the two-person rule">ادخل بكل اسم في متصفح مختلف لتجربة قاعدة الشخصين</span></small>
-</form>
 
 <div id="app" hidden>
   <aside id="side">

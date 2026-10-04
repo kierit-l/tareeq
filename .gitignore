@@ -15,3 +15,9 @@ tareeq/data/strikes/
 tareeq/data/raw/unosat_roads.zip
 
 .DS_Store
+
+# Office lock files
+~$*
+
+# pitch deck (kept local)
+pitch/

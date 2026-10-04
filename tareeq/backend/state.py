@@ -29,6 +29,8 @@ OUTLIER_WINDOW_S = 600
 OUTLIER_SPREAD_M = 1500
 MAX_KMH = 80
 PROVISIONAL_H = 6
+CONFLICT_H = 6
+EVENT_KEEP_S = 14 * 86400
 SALT = os.environ.get("TAREEQ_SALT") or os.urandom(16).hex()  # production requires TAREEQ_SALT (see main.py)
 
 
@@ -36,6 +38,31 @@ def reporter_hash(raw_id: str, now: float) -> str:
     """Daily-rotating salted hash; enough to count independent reporters, useless for tracking."""
     day = int(now // 86400)
     return hashlib.sha256(f"{SALT}:{day}:{raw_id}".encode()).hexdigest()[:16]
+
+
+class EventLog(list):
+    """State-change log behind 'what changed' and alerts. Write-through to SQLite so a restart
+    doesn't drop changes that haven't been alerted yet (only meaningful with an on-disk DB)."""
+
+    def __init__(self, db, lock, since):
+        self.db, self.lock = db, lock
+        db.execute("""CREATE TABLE IF NOT EXISTS events (
+            ts REAL, seg INTEGER, from_state TEXT, to_state TEXT, reason TEXT)""")
+        rows = db.execute("SELECT ts, seg, from_state, to_state, reason FROM events WHERE ts >= ? ORDER BY ts",
+                          (since,)).fetchall()
+        super().__init__({"ts": t, "seg": g, "from": f, "to": to, "reason": r} for t, g, f, to, r in rows)
+
+    def append(self, e):
+        super().append(e)
+        with self.lock:
+            self.db.execute("INSERT INTO events VALUES (?,?,?,?,?)", (e["ts"], e["seg"], e["from"], e["to"], e["reason"]))
+            self.db.commit()
+
+    def clear(self):
+        super().clear()
+        with self.lock:
+            self.db.execute("DELETE FROM events")
+            self.db.commit()
 
 
 @dataclass
@@ -48,6 +75,7 @@ class SegState:
     trusted: bool
     pending: dict          # state -> count of unverified reports
     provisional: bool = False  # one fresh, unconfirmed Blocked report: route around it if possible
+    conflict: tuple = ()       # other verified states seen within CONFLICT_H of the winning one
 
 
 class StateStore:
@@ -64,7 +92,7 @@ class StateStore:
         self.db.execute("""CREATE TABLE IF NOT EXISTS trips (
             id INTEGER PRIMARY KEY, ts REAL, p50 INTEGER, p85 INTEGER, actual INTEGER, segs TEXT, ok INTEGER)""")
         self.clock_offset = 0.0
-        self.events = []                       # state-change log for "what changed" alerts
+        self.events = EventLog(self.db, self.lock, time.time() - EVENT_KEEP_S)
         self._cache = {}
         self._cache_key = None
 
@@ -114,8 +142,22 @@ class StateStore:
                 jumps += 1
         return jumps >= 2
 
+    def contested(self, hours=24):
+        """Segments an operator should look at: an unconfirmed closure, or verified reports that
+        disagree within CONFLICT_H. Most recent evidence first."""
+        segs = [s for (s,) in self.db.execute(
+            "SELECT DISTINCT seg FROM reports WHERE ignored IS NULL AND ts >= ?", (self.now() - hours * 3600,))]
+        out = []
+        for sid in segs:
+            st = self.get(sid)
+            if st.provisional or st.conflict:
+                out.append({"seg": sid, "state": st.state, "conf": round(st.conf, 2), "provisional": st.provisional,
+                            "conflict": list(st.conflict), "pending": st.pending, "updated": st.updated})
+        return sorted(out, key=lambda x: -(x["updated"] or 0))
+
     def purge(self):
         with self.lock:
+            self.db.execute("DELETE FROM events WHERE ts < ?", (self.now() - EVENT_KEEP_S,))
             self.db.execute("DELETE FROM reports WHERE ts < ?", (self.now() - RETENTION_S,))
             self.db.commit()
 
@@ -148,7 +190,7 @@ class StateStore:
         for state, rep, trusted, ts in rows:
             if now - ts <= 3 * TAU_H[state] * 3600:
                 by_state[state].append((rep, trusted, ts))
-        best, pending, pending_newest = None, {}, {}
+        best, pending, pending_newest, verified = None, {}, {}, []
         for state, reps in by_state.items():
             # keep each reporter's latest report only
             latest = {}
@@ -166,12 +208,15 @@ class StateStore:
             conf0 = min(0.95, (0.8 if any_trusted or state == "unsafe" else 0.55) + 0.1 * (n - 1))
             conf = conf0 * math.exp(-(now - newest) / (TAU_H[state] * 3600))
             cand = SegState(state, conf, "verified", newest, n, any_trusted, {})
+            verified.append((state, newest))
             # newest verified evidence wins; safety-critical states win ties
             if best is None or newest > best.updated or (
                     newest == best.updated and STATES.index(state) > STATES.index(best.state)):
                 best = cand
         if best and best.conf >= MIN_CONF:
             best.pending = pending
+            best.conflict = tuple(sorted({st for st, t in verified
+                                          if st != best.state and best.updated - t <= CONFLICT_H * 3600}))
             return best, pending_newest
         prior = self.seg[seg_id]["prior"]
         if prior != "unknown":

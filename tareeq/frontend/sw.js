@@ -9,6 +9,7 @@ const SHELL_URLS = ["/", "/static/app.js", "/static/style.css", "/static/vendor/
   "/static/vendor/leaflet/leaflet.css", "/static/vendor/leaflet/images/marker-icon.png",
   "/static/vendor/leaflet/images/marker-shadow.png", "/static/vendor/protomaps-leaflet/protomaps-leaflet.js"];
 const NO_CACHE_API = ["/api/alerts", "/api/metrics"];   // live-only: a stale copy would look current
+const NO_CACHE_API_PREFIXES = ["/api/ops/admin"];       // approval queues: stale state is dangerous
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(SHELL).then((c) => c.addAll(SHELL_URLS)).then(() => self.skipWaiting()));
@@ -26,10 +27,12 @@ self.addEventListener("fetch", (e) => {
   if (req.method !== "GET" || url.origin !== location.origin) return;
   if (url.pathname === BASEMAP_URL) return e.respondWith(basemap(req));
   if (url.pathname.startsWith("/api/")) {
-    if (NO_CACHE_API.includes(url.pathname)) return;
+    if (NO_CACHE_API.includes(url.pathname) || NO_CACHE_API_PREFIXES.some((p) => url.pathname.startsWith(p))) return;
     return e.respondWith(networkFirst(req, DATA, 5000, true));
   }
-  if (url.pathname === "/" || url.pathname.startsWith("/static/")) return e.respondWith(networkFirst(req, SHELL, 3000, false));
+  // Pages are cached as they are visited (not precached: one missing file in SHELL_URLS would fail the whole install).
+  if (["/", "/field"].includes(url.pathname) || url.pathname.startsWith("/static/"))
+    return e.respondWith(networkFirst(req, SHELL, 3000, false));
 });
 
 // Serve basemap byte ranges from the stored full file; without it, pass through to the network untouched.
@@ -53,7 +56,9 @@ async function basemap(req) {
 // The network request keeps going after the timeout so the cache still gets refreshed.
 async function networkFirst(req, name, timeoutMs, stamp) {
   const cache = await caches.open(name);
-  const network = fetch(req).then(async (res) => {
+  // cache: "no-cache" revalidates with the server (a cheap 304 when unchanged) so the browser's HTTP cache
+  // can't hand back a stale app.js/style.css while we are online.
+  const network = fetch(req, { cache: "no-cache" }).then(async (res) => {
     if (res.ok) await cache.put(req, stamp ? await stamped(res.clone()) : res.clone());
     return res;
   });

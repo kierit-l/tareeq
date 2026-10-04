@@ -39,8 +39,14 @@ small { color: var(--muted); }
 #map { width: 100%; height: 100%; }
 .basemap { filter: grayscale(1) contrast(.85) brightness(1.08); opacity: .55; }
 
-.crosshair { position: absolute; left: 50%; top: calc(50% + 22px); transform: translate(-50%, -50%); font-size: 40px;
-             color: var(--accent); pointer-events: none; z-index: 900; text-shadow: 0 0 4px #fff; font-weight: 700; }
+.pointer { position: absolute; z-index: 900; pointer-events: none; transform: translate(-50%, -100%);
+           display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
+.pointer svg { display: block; }
+.pointer::after { content: ""; position: absolute; bottom: -3px; left: 50%; width: 10px; height: 4px; margin-left: -5px;
+                  border-radius: 50%; background: rgba(0,0,0,.35); }
+.pinlabel { background: var(--bar); color: #fff; font-size: 13px; font-weight: 700; padding: 3px 9px; border-radius: 8px;
+            margin-bottom: 4px; white-space: nowrap; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
+.pinlabel.none { background: #6b6a66; font-weight: 400; }
 
 .fabs { position: absolute; bottom: max(18px, env(safe-area-inset-bottom)); inset-inline-end: 14px; z-index: 950;
         display: flex; flex-direction: column; gap: 12px; align-items: center; }
@@ -61,6 +67,8 @@ small { color: var(--muted); }
          box-shadow: 0 -4px 18px rgba(0,0,0,.25); padding: 12px 12px max(12px, env(safe-area-inset-bottom)); max-height: 80%; overflow-y: auto; }
 .sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 18px; }
 .where { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; margin-bottom: 10px; }
+.target { font-size: 14px; background: #fff4ec; border: 1px solid #f5c9a8; border-radius: 10px; padding: 6px 10px; margin-bottom: 10px; }
+.target.none { background: #f4f4f4; border-color: var(--line); color: var(--muted); }
 .kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .kind { border: 2px solid var(--line); background: #fafafa; border-radius: 12px; padding: 10px 4px; display: flex;
         flex-direction: column; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; min-height: 84px; }

@@ -28,6 +28,7 @@ SIGMA = {"open": 0.15, "degraded": 0.35, "foot_only": 0.3, "unknown": 0.5}  # lo
 UNKNOWN_COST = 2.5
 PROVISIONAL_COST = 5.0      # one unconfirmed Blocked report: only if there is no alternative
 WEAK_SHARE_MAX_HIGH = 0.2   # >20 % of length on satellite prior / Unknown can't be "high" confidence
+OUTLINE_MIN_RUN_M = 150    # shorter stretches (a roundabout, a jog between two streets) fold into a neighbour
 ALIGHT_MIN = 0.5
 TRANSFER_PENALTY_MIN = 4
 GAZA_TZ = timezone(timedelta(hours=3))
@@ -51,6 +52,7 @@ class Router:
         self.store = store
         self.signals = signals    # {"fuel_index": 1.0, ...}
         self.G = nx.DiGraph()
+        self.name_en = {street(p["name"]): p["name_en"] for p in corridor.seg.values() if p["name"] and p["name_en"]}
         self.stand_at = {}
         for s in corridor.stands:
             self.stand_at[s["node"]] = s
@@ -127,7 +129,7 @@ class Router:
 
     # ---- explain ----
     def _describe(self, path, hour):
-        legs, cur = [], None
+        legs, cur, steps = [], None, []
         for a, b in zip(path, path[1:]):
             d = self.G.edges[a, b]
             if d.get("alight"):
@@ -144,6 +146,7 @@ class Router:
                        "len": 0.0, "from_node": a[0]}
                 legs.append(cur)
             minutes, _, st = self._edge_minutes(d, hour)
+            steps.append((d["seg"], st, a[0], b[0]))
             cur["segs"].append((d["seg"], st))
             cur["minutes"] += minutes
             cur["len"] += d["len"]
@@ -200,8 +203,37 @@ class Router:
             "oldest_report_min": round((now - oldest_main) / 60) if oldest_main else None,
             "max_reporters": reporters,
             "legs": out_legs,
+            "outline": self._outline(steps),
             "hour": hour,
         }
+
+    def _outline(self, steps):
+        """Street-by-street summary for SMS: consecutive segments on the same street become one run;
+        short runs fold into the previous one so the outline names only the streets a walker follows."""
+        runs = []
+        for sid, st, a, b in steps:
+            p = self.c.seg[sid]
+            name = street(p["name"])
+            if not runs or runs[-1]["name"] != name:
+                runs.append({"name": name, "name_en": self.name_en.get(name), "highway": p["highway"],
+                             "m": 0.0, "states": {}, "from": self.node_ll(a)})
+            r = runs[-1]
+            r["m"] += p["len"]
+            r["states"][st.state] = r["states"].get(st.state, 0) + p["len"]
+            r["to"] = self.node_ll(b)
+        merged = []
+        for i, r in enumerate(runs):
+            short = r["m"] < OUTLINE_MIN_RUN_M and len(runs) > 1
+            if merged and (short or merged[-1]["name"] == r["name"]):
+                _absorb(merged[-1], r)
+            elif short and i + 1 < len(runs):
+                _absorb(runs[i + 1], r, before=True)
+            else:
+                merged.append(r)
+        for r in merged:
+            r["m"] = round(r["m"])
+            r["states"] = {k: round(v / r["m"], 2) for k, v in r["states"].items()} if r["m"] else {}
+        return merged
 
     def node_ll(self, n):
         return self.c.node_ll[n]
@@ -225,3 +257,18 @@ class Router:
         p50, p85 = np.percentile(total, [50, 85])
         r5 = lambda x: int(5 * math.ceil(x / 5))
         return r5(p50), max(r5(p85), r5(p50) + 5)
+
+
+def street(name):
+    """'شارع صلاح الدين' and 'صلاح الدين' are the same street; OSM tags both."""
+    return name.split(" (")[0].removeprefix("شارع ").strip() if name else None
+
+
+def _absorb(into, r, before=False):
+    into["m"] += r["m"]
+    for k, v in r["states"].items():
+        into["states"][k] = into["states"].get(k, 0) + v
+    if before:
+        into["from"] = r["from"]
+    else:
+        into["to"] = r["to"]

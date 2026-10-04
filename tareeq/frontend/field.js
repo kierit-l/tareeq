@@ -136,13 +136,17 @@ function reportResult(r, kind, late) {
 
 // ---------------- reporting ----------------
 function submit(kind, extra = {}) {
-  const where = document.querySelector("input[name=where]:checked").value;
   let body = { kind, note: $("note").value.trim(), ...extra };
   if (extra.segment === undefined) {
-    let ll;
-    if (where === "gps" && gps) ll = gps;
-    else { const c = map.getCenter(); ll = { lat: c.lat, lng: c.lng }; }
+    updateTarget();
+    if (!targetSeg) {    // never send a report that can't land on a road
+      return toast(pinMode() ? T("📍 حرّك الخريطة حتى يكون الدبوس على طريق.", "📍 Move the map so the pin is on a road.")
+                             : T("لا يوجد طريق قريب من موقعك. اختر «عند الدبوس» وضعه على الطريق.",
+                                 "No road near your location. Choose \"At the pin\" and place it on the road."), true, 5000);
+    }
+    const ll = targetLatLng() || map.getCenter();
     body.lon = +ll.lng.toFixed(6); body.lat = +ll.lat.toFixed(6);
+    if (targetSeg) body.segment = targetSeg.id;   // the highlighted road (safety kinds still use lon/lat + radius)
   }
   setQueue([...queue(), { body, made: Date.now() }]);
   $("note").value = ""; closeSheet();
@@ -164,27 +168,98 @@ function openSheet() {
   const useGps = gps && gps.acc <= 100;
   document.querySelector(`input[name=where][value=${useGps ? "gps" : "pin"}]`).checked = true;
   $("gpsacc").textContent = gps ? T(`(±${ar(Math.round(gps.acc))} م)`, `(±${Math.round(gps.acc)} m)`) : T("(لا يوجد GPS)", "(no GPS)");
-  $("crosshair").hidden = useGps;
   $("sheet").hidden = false;
+  syncPointer();
 }
-function closeSheet() { $("sheet").hidden = true; $("crosshair").hidden = true; }
+function closeSheet() { $("sheet").hidden = true; syncPointer(); }
 $("report").addEventListener("click", openSheet);
 $("closesheet").addEventListener("click", closeSheet);
-document.querySelectorAll("input[name=where]").forEach((r) => r.addEventListener("change", () => {
-  $("crosshair").hidden = r.value === "gps" && r.checked;
-}));
+document.querySelectorAll("input[name=where]").forEach((r) => r.addEventListener("change", syncPointer));
+
+// ---------------- report pointer ----------------
+// In pin mode a pin sits in the middle of the map left visible above the sheet. The road nearest its tip
+// is highlighted and named (pin label + sheet) and is the exact segment the report goes to.
+const SNAP_M = 60;
+let areaSegs = [], targetSeg = null, drawnTarget, targetLayer, pinShift = 0, targetRaf = 0;
+const pinMode = () => !$("sheet").hidden && document.querySelector("input[name=where]:checked").value === "pin";
+
+function pointerPoint() {    // map container pixel under the pin tip
+  const m = $("map").getBoundingClientRect(), sh = $("sheet");
+  const visible = sh.hidden ? m.height : Math.max(120, sh.getBoundingClientRect().top - m.top);
+  return L.point(Math.round(m.width / 2), Math.round(visible * 0.6));
+}
+function targetLatLng() {
+  if (pinMode()) return map.containerPointToLatLng(pointerPoint());
+  return gps ? L.latLng(gps.lat, gps.lng) : null;
+}
+
+// nearest loaded road to ll, in metres (local flat projection is plenty at this scale)
+function nearestSeg(ll) {
+  const kx = 111320 * Math.cos(ll.lat * Math.PI / 180), ky = 110540;
+  let best = null, bestD = Infinity;
+  for (const a of areaSegs) {
+    const pts = a.ll;
+    for (let i = 1; i < pts.length; i++) {
+      const ax = (pts[i - 1][1] - ll.lng) * kx, ay = (pts[i - 1][0] - ll.lat) * ky;
+      const bx = (pts[i][1] - ll.lng) * kx, by = (pts[i][0] - ll.lat) * ky;
+      const dx = bx - ax, dy = by - ay, len = dx * dx + dy * dy;
+      const t = len ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / len)) : 0;
+      const d = Math.hypot(ax + t * dx, ay + t * dy);
+      if (d < bestD) { bestD = d; best = a; }
+    }
+  }
+  return best && bestD <= SNAP_M ? best : null;
+}
+
+function updateTarget() {
+  if (!map) return;
+  const ll = $("sheet").hidden ? null : targetLatLng();
+  const hit = ll && nearestSeg(ll);
+  targetSeg = hit ? hit.s : null;
+  if (drawnTarget !== hit) {
+    drawnTarget = hit;
+    targetLayer.clearLayers();
+    if (hit) {
+      L.polyline(hit.ll, { color: "#fff", weight: 14, opacity: 0.95, interactive: false }).addTo(targetLayer);
+      L.polyline(hit.ll, { color: "#e8590c", weight: 8, interactive: false }).addTo(targetLayer);
+    }
+  }
+  const name = targetSeg && `${targetSeg.name || T("طريق بلا اسم", "Unnamed road")} · ${T(STATE[targetSeg.s].ar, STATE[targetSeg.s].en)}`;
+  const none = pinMode() ? T("لا يوجد طريق تحت الدبوس — حرّك الخريطة", "No road under the pin — move the map")
+                         : T("لا يوجد طريق قريب من موقعك", "No road near your location");
+  $("pinlabel").textContent = targetSeg ? targetSeg.name || T("طريق بلا اسم", "Unnamed road") : T("حرّك الخريطة إلى طريق", "Move onto a road");
+  $("pinlabel").className = "pinlabel" + (targetSeg ? "" : " none");
+  $("target").textContent = targetSeg ? `📍 ${T("تبلغ عن", "Reporting")}: ${name}` : `⚠️ ${none}`;
+  $("target").className = "target" + (targetSeg ? "" : " none");
+}
+function queueTarget() { if (!targetRaf) targetRaf = requestAnimationFrame(() => { targetRaf = 0; updateTarget(); }); }
+
+function syncPointer() {
+  const on = pinMode(), p = pointerPoint();
+  // keep what the user was looking at under the pin, and put it back in the middle when done
+  const want = on ? Math.round(map.getSize().y / 2 - p.y) : 0;
+  if (want !== pinShift) { map.panBy([0, want - pinShift], { animate: false }); pinShift = want; }
+  const m = $("map").getBoundingClientRect(), app = $("app").getBoundingClientRect();
+  $("crosshair").style.left = m.left - app.left + p.x + "px";
+  $("crosshair").style.top = m.top - app.top + p.y + "px";
+  $("crosshair").hidden = !on;
+  updateTarget();
+}
 
 // ---------------- map ----------------
 function startApp() {
   setNet(); showQueue();
   map = L.map("map", { zoomControl: false, maxBounds: [[31.18, 34.15], [31.63, 34.62]], minZoom: 11 })
-    .setView([31.37, 34.30], 14);
+    .setView([31.346, 34.303], 15);   // central Khan Younis: dense roads, so the report pin starts on one
   protomapsL.leafletLayer({ url: BASEMAP_URL, flavor: "light", lang: LANG, maxDataZoom: 14, className: "basemap",
                             attribution: "© OpenStreetMap contributors · Protomaps" }).addTo(map);
   map.createPane("hazards").style.zIndex = 390;
   segLayer = L.layerGroup().addTo(map);
   hazardLayer = L.layerGroup().addTo(map);
   repLayer = L.layerGroup().addTo(map);
+  targetLayer = L.layerGroup().addTo(map);
+  map.on("move", queueTarget);
+  window.addEventListener("resize", () => { if (!$("sheet").hidden) syncPointer(); });
   map.on("moveend", () => { clearTimeout(areaTimer); areaTimer = setTimeout(() => refreshArea(false), 400); });
   $("legend").innerHTML = ["open", "degraded", "foot_only", "blocked", "unsafe"].map((s) =>
     `<div><i style="background:${STATE[s].color}"></i>${T(STATE[s].ar, STATE[s].en)}</div>`).join("") +
@@ -205,6 +280,7 @@ function startGps() {
       meMarker = L.marker(ll, { icon: L.divIcon({ className: "", html: '<div class="me-dot"></div>', iconSize: [16, 16] }), interactive: false }).addTo(map);
       meCircle = L.circle(ll, { radius: gps.acc, color: "#0b5cad", weight: 1, fillOpacity: 0.08, interactive: false }).addTo(map);
     } else { meMarker.setLatLng(ll); meCircle.setLatLng(ll).setRadius(gps.acc); }
+    if (!$("sheet").hidden) queueTarget();
     if (first && map.options.maxBounds.contains(ll)) { map.setView(ll, 16); first = false; }
   }, () => {}, { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 });
 }
@@ -245,14 +321,22 @@ function drawArea(d) {
   segLayer.clearLayers(); hazardLayer.clearLayers(); repLayer.clearLayers();
   const renderer = L.canvas({ tolerance: 8 });
   const mid = {};
+  areaSegs = [];
   for (const s of d.segments) {
     const st = STATE[s.s], ll = s.c.map(([x, y]) => [y, x]);
     mid[s.id] = ll[Math.floor(ll.length / 2)];
+    areaSegs.push({ s, ll });
     const weak = s.src === "p" || s.s === "unknown";
     L.polyline(ll, { renderer, color: st.color, dashArray: st.dash, weight: weak ? 2 : 5, opacity: weak ? 0.4 : 0.9 })
-      .on("click", (e) => L.popup().setLatLng(e.latlng).setContent(segPopup(s)).openOn(map))
+      .on("click", (e) => {
+        // while placing the pin, tapping a road moves the pin onto it instead of opening the popup
+        if (pinMode()) return map.panBy(map.latLngToContainerPoint(e.latlng).subtract(pointerPoint()));
+        L.popup().setLatLng(e.latlng).setContent(segPopup(s)).openOn(map);
+      })
       .addTo(segLayer);
   }
+  drawnTarget = undefined;
+  updateTarget();
   for (const h of d.hazards) {
     const p = h.properties;
     if (p.kind === "strike") {

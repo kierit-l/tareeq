@@ -18,7 +18,7 @@ def client():
 
 
 def login(c, name):
-    return {"Authorization": "Bearer " + c.post("/api/ops/admin/login", json={"name": name, "password": "demo"}).json()["token"]}
+    return {"X-Operator": name}
 
 
 def route_segments(c):
@@ -30,10 +30,10 @@ def square(lon, lat, d=0.001):
     return {"type": "Polygon", "coordinates": [[[lon - d, lat - d], [lon + d, lat - d], [lon + d, lat + d], [lon - d, lat + d], [lon - d, lat - d]]]}
 
 
-def test_admin_requires_login(client):
+def test_admin_rejects_unknown_operator(client):
     c, _ = client
-    assert c.get("/api/ops/admin/zones").status_code == 401
-    assert c.post("/api/ops/admin/login", json={"name": "amal", "password": "nope"}).status_code == 401
+    assert c.get("/api/ops/admin/zones").status_code == 200
+    assert c.get("/api/ops/admin/zones", headers={"X-Operator": "mallory"}).status_code == 401
 
 
 def test_zone_two_person_rule_and_routing(client):

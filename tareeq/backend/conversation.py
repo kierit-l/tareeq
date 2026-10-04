@@ -41,7 +41,7 @@ class Conversation:
         hits.append(now)
         self.hits[key] = hits
         if len(hits) > RATE_LIMIT_PER_H:
-            return {"reply": sms.RATE_LIMITED, "parsed": {"intent": "rate_limited"}}
+            return {"reply": sms.rate_limited_text(), "parsed": {"intent": "rate_limited"}}
 
         p = parse(text)
         pend = self.pending.pop(key, None)
@@ -55,18 +55,21 @@ class Conversation:
 
     # ---------- intents ----------
     def _route(self, p, sender, key):
-        r = self.router().route(p["from"]["node"], p["to"]["node"])
+        walk = p.get("modes") == ["foot"]
+        r = self.router().route(p["from"]["node"], p["to"]["node"], p.get("modes"))
         if r:
             self.last[key] = {"from": p["from"], "to": p["to"], "route": r, "ts": self.store().now()}
-        return {"reply": sms.route_reply(p["from"], p["to"], r), "route": r}
+        reply = (sms.walk_reply if walk else sms.route_reply)(p["from"], p["to"], r)
+        return {"reply": reply, "route": r}
 
     def _alert(self, p, sender, key):
         r = self.router().route(p["from"]["node"], p["to"]["node"])
         segs = {s for l in (r or {}).get("legs", []) for s in l["segments"]}
         self.subs[sender] = {"from": p["from"], "to": p["to"], "segs": segs, "since": self.store().now(),
                              "channel": self.channel}
-        return {"reply": sms.fit(f"تم. سننبهك عند تغيّر الطريق {sms.short(p['from']['name'])}←{sms.short(p['to']['name'])}. "
-                                 "أرسل إلغاء للإيقاف."), "route": r}
+        od = f"{sms.short(p['from']['name'])}{sms.arrow()}{sms.short(p['to']['name'])}"
+        return {"reply": sms.fit(sms.tr(f"تم. سننبهك عند تغيّر الطريق {od}. أرسل إلغاء للإيقاف.",
+                                        f"Done. We'll alert you when the {od} route changes. Send stop to end.")), "route": r}
 
     def _report(self, p, sender, key):
         segs, question = self._report_segments(key, p["place"], p["state"])
@@ -77,7 +80,7 @@ class Conversation:
     def _arrived(self, p, sender, key):
         last = self._last(key)
         if not last:
-            return {"reply": sms.NEED_ROUTE}
+            return {"reply": sms.need_route_text()}
         r = last["route"]
         if p["minutes"] is None:
             return {"reply": sms.arrived_reply(None, 0, 0)}
@@ -102,41 +105,44 @@ class Conversation:
                 return question
             return self._file(segs, "blocked", sender, place)
         else:
-            return {"reply": sms.NEED_ROUTE}
+            return {"reply": sms.need_route_text()}
         return {"reply": sms.failed_reply(place["name"] if place else None, res), "trip": "failed"}
 
     def _unsubscribe(self, p, sender, key):
         if self.on_unsubscribe:
             self.on_unsubscribe(sender)
         self.subs.pop(sender, None)
-        return {"reply": sms.UNSUB}
+        return {"reply": sms.unsub_text()}
 
     def _privacy(self, p, sender, key):
-        return {"reply": sms.fit(sms.PRIVACY)}
+        return {"reply": sms.fit(sms.privacy_text())}
 
     def _help(self, p, sender, key):
-        return {"reply": sms.HELP}
+        return {"reply": sms.help_text()}
 
     def _suggest(self, p, sender, key):
         names = [c["name"] for c in p["choices"]]
         self.pending[key] = {"type": "place", "template": p["template"], "options": names}
-        return {"reply": sms.numbered("لم نعرف المكان. هل تقصد:", names)}
+        return {"reply": sms.numbered(sms.tr("لم نعرف المكان. هل تقصد:", "We didn't recognise the place. Did you mean:"), names)}
 
     def _out_of_coverage(self, p, sender, key):
-        return {"reply": sms.fit(f"{p['name']} خارج منطقة الخدمة حالياً (دير البلح – خان يونس – المواصي). "
-                                 "نعمل على التوسع.")}
+        return {"reply": sms.fit(sms.tr(f"{p['name']} خارج منطقة الخدمة حالياً (دير البلح – خان يونس – المواصي). نعمل على التوسع.",
+                                        f"{sms.short(p['name'])} is outside our service area for now (Deir el-Balah – Khan Younis – Mawasi). "
+                                        "We're working on expanding."))}
 
     def _ambiguous_od(self, p, sender, key):
-        return {"reply": sms.ASK_OD}
+        return {"reply": sms.ask_od_text()}
 
     def _unknown(self, p, sender, key):
-        return {"reply": "لم نفهم الرسالة. " + sms.HELP[:110]}
+        if sms.en():
+            return {"reply": "Sorry, we didn't understand. Send: route [from] to [to] — e.g. route Mawasi to Nasser. Send help for more."}
+        return {"reply": "لم نفهم الرسالة. " + sms.HELP_AR[:110]}
 
     # ---------- helpers ----------
     def _answer_choice(self, n, pend, sender, key, parse):
         if not 1 <= n <= len(pend["options"]):
             self.pending[key] = pend
-            return {"reply": sms.numbered("اختر رقماً:", [o if isinstance(o, str) else o[0] for o in pend["options"]]),
+            return {"reply": sms.numbered(sms.tr("اختر رقماً:", "Pick a number:"), [o if isinstance(o, str) else o[0] for o in pend["options"]]),
                     "parsed": {"intent": "choice"}}
         if pend["type"] == "place":
             return self.handle(pend["template"].format(pend["options"][n - 1]), sender, parse, self.channel)
@@ -156,12 +162,14 @@ class Conversation:
         for sid in touching:
             streets.setdefault(self._street_label(sid, place), []).append(sid)
         ring = [k for k in streets if norm(k) == norm(place["name"])]   # the roundabout itself isn't a "street"
+        itself = sms.tr("الدوار نفسه", "the roundabout itself")
         if ring and len(streets) > 1:
-            streets["الدوار نفسه"] = streets.pop(ring[0])   # offered last as its own option
+            streets[itself] = streets.pop(ring[0])   # offered last as its own option
         if len(streets) > 1:
-            options = sorted(streets.items(), key=lambda kv: (kv[0] == "الدوار نفسه", kv[0]))
+            options = sorted(streets.items(), key=lambda kv: (kv[0] == itself, kv[0]))
             self.pending[key] = {"type": "street", "options": options, "state": state, "place": place}
-            return None, {"reply": sms.numbered(f"أي شارع عند {sms.short(place['name'])}؟", [o[0] for o in options])}
+            question = sms.tr(f"أي شارع عند {sms.short(place['name'])}؟", f"Which street at {sms.short(place['name'])}?")
+            return None, {"reply": sms.numbered(question, [o[0] for o in options])}
         return touching, None
 
     def _roundabout(self, place):
@@ -186,6 +194,8 @@ class Conversation:
         heading = compass(x1 - x0, y1 - y0)
         if p["name"]:
             return p["name"] if norm(p["name"]) == norm(place["name"]) else f"{p['name']} ({heading})"
+        if sms.en():
+            return f"{HIGHWAY_EN.get(p['highway'], 'road')} {heading}"
         return f"{HIGHWAY_AR.get(p['highway'], 'طريق')} باتجاه {heading}"
 
     def _file(self, segs, state, sender, place):
@@ -210,10 +220,14 @@ HIGHWAY_AR = {"trunk": "طريق رئيسي", "primary": "طريق رئيسي", 
               "residential": "شارع فرعي", "unclassified": "طريق", "service": "طريق خدمة", "track": "طريق ترابي"}
 
 
+HIGHWAY_EN = {"trunk": "main road", "primary": "main road", "secondary": "main road", "tertiary": "road",
+              "residential": "side street", "unclassified": "road", "service": "service road", "track": "dirt track"}
+
+
 def compass(dx, dy):
     if abs(dx) > abs(dy):
-        return "الشرق" if dx > 0 else "الغرب"
-    return "الشمال" if dy > 0 else "الجنوب"
+        return sms.tr("الشرق", "east") if dx > 0 else sms.tr("الغرب", "west")
+    return sms.tr("الشمال", "north") if dy > 0 else sms.tr("الجنوب", "south")
 
 
 def route_segs(r):

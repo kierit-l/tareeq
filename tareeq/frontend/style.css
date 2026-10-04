@@ -55,17 +55,19 @@ button.ghost { background: transparent; width: 100%; margin-top: 6px; }
 .sms-preview { font-size: 13px; background: #eef5ff; border-radius: 6px; padding: 6px 8px; margin-top: 6px; direction: rtl; }
 
 /* phone */
-.phone-wrap { padding: 10px; border-inline-start: 1px solid var(--line); display: flex; }
+.phone-wrap { padding: 10px; border-inline-start: 1px solid var(--line); display: flex; min-height: 0; }  /* grid item: let .chat scroll instead of overflowing the page */
 .phone { flex: 1; display: flex; flex-direction: column; background: #111; border-radius: 26px; padding: 10px; min-height: 0; }
 .phone-top { color: #ddd; text-align: center; font-size: 12px; padding: 4px 0 8px; }
 .chat { flex: 1; overflow-y: auto; background: #ece5dd; border-radius: 14px 14px 0 0; padding: 10px; display: flex; flex-direction: column; gap: 6px; min-height: 0; }
 .msg { max-width: 88%; padding: 7px 9px; border-radius: 10px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; }
-.msg.me { align-self: flex-start; background: #dcf8c6; }
-.msg.bot { align-self: flex-end; background: #fff; }
-.msg.alert { align-self: flex-end; background: #fff1f0; border: 1px solid #f3b3ad; }
+.msg.me { align-self: flex-end; background: #dcf8c6; }   /* phone is always ltr: own messages on the right */
+.msg.bot { align-self: flex-start; background: #fff; }
+.msg.alert { align-self: flex-start; background: #fff1f0; border: 1px solid #f3b3ad; }
 .msg .meta { display: block; font-size: 10px; color: #888; margin-top: 3px; direction: ltr; text-align: left; }
 .chips { background: #ece5dd; display: flex; flex-wrap: wrap; gap: 4px; padding: 6px; }
 .chips button { font-size: 12px; padding: 3px 7px; border-radius: 999px; }
+.chips .grp { flex-basis: 100%; font-size: 11px; color: #6b6a66; margin: 4px 2px 0; }
+.chips .grp:first-child { margin-top: 0; }
 #smsform { display: flex; gap: 4px; background: #ece5dd; padding: 6px; border-radius: 0 0 14px 14px; }
 #smsform input { flex: 1; border-radius: 999px; }
 #smsform button { border-radius: 999px; background: #128c7e; color: #fff; border: 0; }

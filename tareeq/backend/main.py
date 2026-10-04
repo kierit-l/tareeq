@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import os
 import random
+import time
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -16,7 +17,7 @@ from pydantic import BaseModel
 
 import sms
 from graph import Corridor
-from nlu import Gazetteer, parse
+from nlu import OUT_OF_COVERAGE, Gazetteer, parse
 from alerts import Alerts
 from conversation import Conversation
 from router import Router
@@ -27,6 +28,22 @@ FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
 app = FastAPI(title="Tareeq — Gaza Transit Info")
 app.add_middleware(GZipMiddleware, minimum_size=1000)   # segments.geojson is ~2.3 MB raw; small payloads matter on bad links
 C = Corridor()
+# English names for the English-language SMS simulator; OSM has no name:en for these
+EXTRA_EN = {"دوار بني سهيلا": "Bani Suheila Roundabout", "عيادة الصفا": "Al-Safa Clinic",
+            "مركز صحي دير البلح": "Deir el-Balah Health Centre", "عيادة حكر الجامع": "Hekr al-Jame Clinic",
+            "عيادة عبسان الصغيرة": "Abasan al-Saghira Clinic", "مختبر فراس الطبي": "Firas Medical Lab",
+            "مركز صحي البركة": "Al-Baraka Health Centre", "اطباء بلا حدود بلجيكا": "MSF Belgium",
+            "بوابة اصداء الشمالية": "Asdaa North Gate", "الهلال الميداني": "Al-Hilal Field Hospital",
+            "مركز البركة الطبي": "Al-Baraka Medical Centre", "عيادة البلد": "Al-Balad Clinic",
+            "مستشفى يافا الطبي": "Yafa Hospital", "مركز الرعاية الطبية": "Medical Care Centre",
+            "عيادة القدس الخيرية": "Al-Quds Charity Clinic"}
+for _p in C.places:
+    _p["en"] = _p.get("en") or EXTRA_EN.get(_p["name"])
+    if _p["en"]:
+        sms.NAME_EN[_p["name"]] = _p["en"]
+for _s in C.stands:
+    sms.NAME_EN[_s["name"]] = sms.NAME_EN.get(_s["place"], _s["place"]) + " stand"
+sms.NAME_EN.update({name: next((a for a in al if a.isascii()), name) for name, al in OUT_OF_COVERAGE.items()})
 GAZ = Gazetteer(C.places)
 SIGNALS = {"fuel_index": 1.0}
 WORLD = {}
@@ -40,6 +57,8 @@ else:
         raise RuntimeError("TAREEQ_DEMO=0 requires TAREEQ_SUBS_KEY (encrypts subscriber phone numbers)")
     SUBSCRIPTIONS = PersistentSubscriptions(str(Path(__file__).resolve().parent.parent / "data/subscriptions.db"),
                                             os.environ["TAREEQ_SUBS_KEY"], lambda name: GAZ.match(name, 1.0)[0])
+    if SUBSCRIPTIONS.rotated:
+        print(f"re-encrypted {SUBSCRIPTIONS.rotated} subscriptions with the newest TAREEQ_SUBS_KEY")
 
 
 def active_nogo():
@@ -125,6 +144,7 @@ SIGNALS["fuel_index"] = 1.0
 reset()
 CONV = Conversation(lambda: WORLD["store"], lambda: WORLD["router"], C, GAZ,
                     lambda node: segments_at(node), SUBSCRIPTIONS)
+PURGE = {"last": 0.0}
 ALERTS = Alerts(lambda: WORLD["store"], lambda: WORLD["router"], SUBSCRIPTIONS)
 CONV.on_unsubscribe = ALERTS.unsubscribe
 
@@ -135,6 +155,9 @@ async def push_alerts(request, call_next):
     response = await call_next(request)
     if request.method == "POST" and request.url.path.startswith("/api/"):
         ALERTS.dispatch()
+    if time.time() - PURGE["last"] > 3600:   # enforce the 14-day raw-report retention promise
+        PURGE["last"] = time.time()
+        S().purge()
     return response
 
 
@@ -230,6 +253,7 @@ def segments_at(node):
 class SmsIn(BaseModel):
     text: str
     sender: str = "+970-demo"
+    lang: str = "ar"   # the web simulator sends "en" for English replies
 
 
 def handle_sms(text, sender, channel="web"):
@@ -242,7 +266,11 @@ def slim(p):
 
 @app.post("/api/sms")
 def sms_in(m: SmsIn):
-    out = handle_sms(m.text, m.sender)
+    lang = sms.LANG.set("en" if m.lang == "en" else "ar")
+    try:
+        out = handle_sms(m.text, m.sender)
+    finally:
+        sms.LANG.reset(lang)
     out["chars"] = len(out["reply"])
     return out
 
@@ -263,9 +291,13 @@ async def twilio(request: Request):
 
 
 @app.get("/api/alerts")
-def alerts(sender: str = "+970-demo"):
+def alerts(sender: str = "+970-demo", lang: str = "ar"):
     """'What changed' for a subscriber (pull; SMS subscribers are pushed by ALERTS.dispatch)."""
-    return ALERTS.collect(sender) or {"alerts": []}
+    token = sms.LANG.set("en" if lang == "en" else "ar")
+    try:
+        return ALERTS.collect(sender) or {"alerts": []}
+    finally:
+        sms.LANG.reset(token)
 
 
 @app.get("/api/changes")

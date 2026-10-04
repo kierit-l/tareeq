@@ -12,7 +12,8 @@ cd tareeq
 uv venv -p 3.11 .venv && uv pip install -p .venv -r requirements.txt
 .venv/bin/python data/ingest.py          # only if data/build/ is missing (needs data/raw/)
 cd backend && ../.venv/bin/uvicorn main:app --port 8765
-# open http://localhost:8765
+# open http://localhost:8765  (operator console: /admin, field reporting: /field)
+.venv/bin/python -m pytest -q tests     # from tareeq/
 ```
 
 Optional: `export ANTHROPIC_API_KEY=...` turns on Claude parsing of free-form Arabic SMS
@@ -81,6 +82,53 @@ Unknown places get the 3 closest matches; a missing origin or destination gets "
 
 `TAREEQ_DEMO=1` (default): in-memory store, simulated seed reports, routes carry `"demo": true` (SMS ends "· تجريبي"), and the clock, no-go toggle, reset and client-side trusted flag are enabled.
 `TAREEQ_DEMO=0`: requires `TAREEQ_SALT` and `TAREEQ_SUBS_KEY`; reports go to `data/tareeq.db`, alert subscriptions to a separate `data/subscriptions.db` (phone numbers Fernet-encrypted, looked up by HMAC, row deleted on إلغاء), never seeds, and disables those demo endpoints. Trusted reporters come from `TAREEQ_TRUSTED`. Set `TWILIO_AUTH_TOKEN` to enforce webhook signatures; add `TWILIO_ACCOUNT_SID` + `TWILIO_FROM` to push route-change alerts to SMS subscribers (max 3/day; web subscribers pull `/api/alerts`).
+
+## Operations (production, `TAREEQ_DEMO=0`)
+
+**Persistence.** `data/tareeq.db` holds reports (purged after 14 days, enforced hourly), trip outcomes and the
+state-change event log (kept 14 days, so changes not yet alerted survive a restart). `data/subscriptions.db`
+holds alert subscriptions, including each subscriber's daily alert count, so a restart doesn't reset the
+3-per-day cap.
+
+**Backing up `TAREEQ_SUBS_KEY`.** Without the key, `subscriptions.db` is unreadable, by design. Keep the key in
+a password manager or secret store held by two named people, *separately* from database backups. A
+backup of `subscriptions.db` without the key is useless to whoever obtains it, and a key without a backup is harmless.
+If the key is lost, delete `subscriptions.db`; subscribers re-subscribe by SMS.
+
+**Rotating `TAREEQ_SUBS_KEY`** (scheduled, or immediately if the key may have leaked):
+1. Generate a new secret: `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
+2. Restart with `TAREEQ_SUBS_KEY="<new>,<old>"`. On startup every row is decrypted with any listed key,
+   then re-encrypted and re-keyed (HMAC id) with the newest (MultiFernet). The startup log shows the count.
+3. Back up the new key, then restart with `TAREEQ_SUBS_KEY="<new>"` only and destroy the old key.
+
+**Operator console and field reporting** (`backend/ops.py`, `backend/strikes.py`):
+
+| Page / setting | What it does |
+|---|---|
+| `/admin` | Operator console: approve and expire zones, a queue of contested segments, reporter codes, broadcasts, audit log |
+| `/field` | Aid-worker reporting page. Codes are issued in the console; the demo code is `DEMO-0000`. Field reports count as trusted |
+| `TAREEQ_OPERATORS="name,name,..."` | Operator names offered in the console's "acting as" picker (no login; default `amal,omar`). At least two are needed for the two-person rule |
+| `data/ops.db` | Production only: zones, hashed reporter codes, field notes (purged after 14 days), broadcasts, audit log |
+| `data/strikes/events.json` | Cache of non-demo strike hazards, so they survive restarts |
+| `FIRMS_MAP_KEY` | Optional NASA FIRMS key. Without it the keyless global 24 h CSVs are used, refreshed every 3 h (`TAREEQ_STRIKES_REFRESH_S`) |
+| `TAREEQ_STRIKES_URL` | A partner GeoJSON feed of strike Points |
+| `TAREEQ_FIRMS=0` · `TAREEQ_GDELT=0` | Disable that feed |
+| `TAREEQ_STRIKES_FETCH=0` | Disable all strike fetching (the tests set this) |
+
+Strike hazards and approved zones become official no-go polygons with their own `buffer_m` and an expiry, so
+they override crowd reports like any OCHA/UN zone. `ops.install` wraps `main.reset`, so a demo reset re-applies
+approved zones and live strikes.
+
+**Live Twilio test** (needs your account; nothing is sent until these are set):
+1. Buy or verify a number in the Twilio console. For WhatsApp, use the sandbox number.
+2. `export TWILIO_ACCOUNT_SID=AC… TWILIO_AUTH_TOKEN=… TWILIO_FROM=+1…`, then start the server.
+3. Expose it over HTTPS, e.g. `cloudflared tunnel --url http://localhost:8765` or `ngrok http 8765`.
+4. In the number's *Messaging → A message comes in* webhook, set `https://<tunnel>/api/twilio` (HTTP POST).
+   With `TWILIO_AUTH_TOKEN` set, requests without a valid `X-Twilio-Signature` get 403. The signed URL
+   must match exactly, so use the public tunnel URL.
+5. From a phone: send `طريق المواصي ناصر` for a reply, then `تنبيه المواصي ناصر`. Then block a segment on that
+   route (web map, two reports) and an alert SMS should arrive (3 per day at most). Send `إلغاء` to stop.
+6. Note: Arabic SMS is UCS-2, 70 characters per segment, so a 160-character reply costs 3 segments.
 
 ## Known simplifications
 

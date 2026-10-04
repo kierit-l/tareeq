@@ -37,7 +37,6 @@ class Alerts:
         self.store, self.router = store, router   # callables: the world can be reset
         self.subs = subscriptions
         self.send = send
-        self.sent = {}                            # sender -> (gaza day, count)
         self.lock = threading.Lock()
 
     def collect(self, sender):
@@ -53,19 +52,26 @@ class Alerts:
         sub["segs"] = {s for l in (r or {}).get("legs", []) for s in l["segments"]}
         self.subs[sender] = sub   # write-through for persistent storage
         worst = max(evs, key=lambda e: STATES.index(e["to"]))
-        msg = sms.fit(f"تنبيه: تغيّر طريقك ({sms.STATE_AR[worst['to']]}). " + sms.route_reply(sub["from"], sub["to"], r))
+        head = sms.tr(f"تنبيه: تغيّر طريقك ({sms.STATE_AR[worst['to']]}). ", f"Alert: your route changed ({sms.STATE_EN[worst['to']]}). ")
+        msg = sms.fit(head + sms.route_reply(sub["from"], sub["to"], r))
         return {"alerts": [msg], "events": evs, "route": r}
 
     def dispatch(self):
         """Push pending alerts to SMS subscribers, respecting the daily cap."""
         day = datetime.fromtimestamp(self.store().now(), GAZA_TZ).date()
+        lang = sms.LANG.set("ar")   # real SMS is always Arabic, even when triggered from the English simulator
+        try:
+            self._dispatch(day)
+        finally:
+            sms.LANG.reset(lang)
+
+    def _dispatch(self, day):
         with self.lock:
             for sender, sub in list(self.subs.items()):
                 if sub.get("channel") != "twilio":
                     continue
-                d, n = self.sent.get(sender, (day, 0))
-                if d != day:
-                    n = 0
+                # the cap counter lives on the subscription so it persists with it
+                n = sub.get("sent_count", 0) if sub.get("sent_day") == day.isoformat() else 0
                 if n >= MAX_PER_DAY:
                     continue      # don't consume events; the next day's first alert summarises the route
                 a = self.collect(sender)
@@ -74,9 +80,10 @@ class Alerts:
                 body = a["alerts"][0]
                 if n == MAX_PER_DAY - 1:
                     body = sms.fit("آخر تنبيه اليوم. " + body)
-                self.sent[sender] = (day, n + 1)
+                sub = self.subs[sender]
+                sub["sent_day"], sub["sent_count"] = day.isoformat(), n + 1
+                self.subs[sender] = sub
                 threading.Thread(target=self.send, args=(sender, body), daemon=True).start()
 
     def unsubscribe(self, sender):
         self.subs.pop(sender, None)
-        self.sent.pop(sender, None)

@@ -37,7 +37,11 @@
   </header>
 
   <div id="map"></div>
-  <div id="crosshair" class="crosshair" hidden>＋</div>
+  <!-- report pointer: its tip marks the spot; the road under it is highlighted and named -->
+  <div id="crosshair" class="pointer" hidden>
+    <div id="pinlabel" class="pinlabel"></div>
+    <svg viewBox="0 0 32 44" width="34" height="46" aria-hidden="true"><path d="M16 42.5S2.5 26.5 2.5 16a13.5 13.5 0 0 1 27 0C29.5 26.5 16 42.5 16 42.5z" fill="#e8590c" stroke="#fff" stroke-width="2.5"/><circle cx="16" cy="16" r="5.5" fill="#fff"/></svg>
+  </div>
 
   <div class="fabs">
     <button id="locate" class="fab small" title="My location">◎</button>
@@ -55,8 +59,9 @@
     </div>
     <div class="where">
       <label><input type="radio" name="where" value="gps" checked> <span data-en="At my location">في موقعي</span> <small id="gpsacc"></small></label>
-      <label><input type="radio" name="where" value="pin"> <span data-en="At the map pin (＋)">عند العلامة (＋)</span></label>
+      <label><input type="radio" name="where" value="pin"> <span data-en="At the pin 📍 (move the map)">عند الدبوس 📍 (حرّك الخريطة)</span></label>
     </div>
+    <div class="target" id="target"></div>
     <div class="kinds" id="kinds"></div>
     <input id="note" maxlength="140" placeholder="ملاحظة قصيرة (اختياري)" data-en-placeholder="Short note (optional)">
     <p class="fine" data-en="Safety reports (strike, checkpoint, ordnance) close the road for everyone straight away.">بلاغات الخطر (قصف، حاجز، ذخائر) تغلق الطريق للجميع فوراً.</p>

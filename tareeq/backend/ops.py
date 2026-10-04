@@ -14,7 +14,6 @@ Rules:
     hashed; a report's GPS fix is used once to find the road and never stored.
 """
 import hashlib
-import hmac
 import json
 import os
 import secrets
@@ -22,6 +21,8 @@ import sqlite3
 import threading
 import time
 from pathlib import Path
+
+from graph import to_utm
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from fastapi.responses import FileResponse
@@ -32,7 +33,6 @@ import strikes as strikes_mod
 
 ROOT = Path(__file__).resolve().parent.parent
 FRONTEND = ROOT / "frontend"
-SESSION_TTL_S = 12 * 3600
 FIELD_MAX_AGE_S = 24 * 3600          # queued offline reports older than this are dropped
 NOTE_RETENTION_S = 14 * 86400        # same as raw reports (spec section 5)
 ZONE_KINDS = {"yellow_line", "evacuation", "military", "uxo", "other"}
@@ -53,7 +53,6 @@ FIELD_KINDS = {
 
 router = APIRouter()
 W = {}      # main.py namespace: C, S, R, DEMO, active_nogo, ALERTS, SUBSCRIPTIONS, reset
-SESSIONS = {}
 LOCK = threading.RLock()
 DB = None
 STRIKES = None
@@ -168,16 +167,17 @@ def strike_loop():
 
 # ---------------- auth ----------------
 def operators():
-    raw = os.environ.get("TAREEQ_OPERATORS") or ("amal:demo,omar:demo" if W["DEMO"] else "")
-    return dict(x.split(":", 1) for x in raw.split(",") if ":" in x)
+    """Operator names (no passwords: the console has no login). Two names are needed for the two-person rule."""
+    raw = os.environ.get("TAREEQ_OPERATORS") or "amal,omar"
+    return [x.split(":", 1)[0].strip() for x in raw.split(",") if x.strip()]
 
 
-def operator(authorization: str = Header("")):
-    tok = authorization.removeprefix("Bearer ").strip()
-    s = SESSIONS.get(tok)
-    if not s or s["exp"] < now_real():
-        raise HTTPException(401, "login required")
-    return s["name"]
+def operator(x_operator: str = Header("")):
+    ops = operators()
+    name = x_operator.strip() or ops[0]
+    if name not in ops:
+        raise HTTPException(401, "unknown operator")
+    return name
 
 
 def field_reporter(code):
@@ -187,26 +187,6 @@ def field_reporter(code):
     if not row or not row[3]:
         raise HTTPException(401, "unknown or revoked access code")
     return {"id": row[0], "label": row[1], "org": row[2], "hash": code_hash(code)}
-
-
-class LoginIn(BaseModel):
-    name: str
-    password: str
-
-
-@router.post("/api/ops/admin/login")
-def login(b: LoginIn):
-    ops = operators()
-    if not ops:
-        raise HTTPException(503, "no operators configured (set TAREEQ_OPERATORS=name:password,...)")
-    pw = ops.get(b.name)
-    if pw is None or not hmac.compare_digest(pw, b.password):
-        audit(b.name, "login_failed")
-        raise HTTPException(401, "wrong name or password")
-    tok = secrets.token_urlsafe(24)
-    SESSIONS[tok] = {"name": b.name, "exp": now_real() + SESSION_TTL_S}
-    audit(b.name, "login")
-    return {"token": tok, "name": b.name, "demo": W["DEMO"], "operators": sorted(ops)}
 
 
 # ---------------- zones (S1/S2) ----------------
@@ -462,7 +442,7 @@ def overview(op: str = Depends(operator)):
     pending_zones = DB.execute("SELECT COUNT(*) FROM zones WHERE status IN ('pending','pending_removal')").fetchone()[0]
     pending_bc = DB.execute("SELECT COUNT(*) FROM broadcasts WHERE status='pending'").fetchone()[0]
     reporters_n = DB.execute("SELECT COUNT(*) FROM reporters WHERE active=1").fetchone()[0]
-    return {"me": op, "demo": W["DEMO"], "metrics": S().trip_stats(), "pending_zones": pending_zones,
+    return {"me": op, "operators": operators(), "demo": W["DEMO"], "metrics": S().trip_stats(), "pending_zones": pending_zones,
             "pending_broadcasts": pending_bc, "active_reporters": reporters_n,
             "subscribers": len(W["SUBSCRIPTIONS"]), "official_unsafe_segments": len(S().official_unsafe),
             "strikes": STRIKES.status()}
@@ -601,7 +581,9 @@ def field_area(lon: float, lat: float, r: float = 1500):
     C, S = W["C"], W["S"]
     r = max(200, min(r, 4000))
     pt = {"geometry": {"type": "Point", "coordinates": [lon, lat]}, "properties": {"buffer_m": r}}
-    ids = C.segments_in(pt)[:2500]
+    # nearest first, so a zoomed-out view never drops the roads in the middle (where the report pin is)
+    cx, cy = to_utm(lon, lat)
+    ids = sorted(C.segments_in(pt), key=lambda sid: (C.seg[sid]["xy"][0] - cx) ** 2 + (C.seg[sid]["xy"][1] - cy) ** 2)[:2500]
     now = sim_now()
     feats = W.setdefault("_feat_by_id", {f["properties"]["id"]: f for f in C.geojson["features"]})
     segs = []

@@ -1,5 +1,6 @@
 // Tareeq web client: map of segment states, route planner, SMS simulator, demo controls.
-// UI language: Arabic by default, English for presenting. Switching reloads; backend data and SMS replies stay Arabic.
+// UI language: Arabic by default, English for presenting. Switching reloads; backend data and SMS replies stay Arabic,
+// except the phone simulator, which is always English (it asks the backend for English replies).
 const LANG = localStorage.getItem("tareeq.lang") === "en" ? "en" : "ar", EN = LANG === "en";
 const T = (a, e) => (EN ? e : a);
 document.documentElement.lang = LANG;
@@ -60,6 +61,8 @@ protomapsL.leafletLayer({ url: BASEMAP_URL, flavor: "light", lang: LANG, maxData
   attribution: "© OpenStreetMap contributors · Protomaps" }).addTo(map);
 map.createPane("nogo").style.zIndex = 390;
 map.createPane("route").style.zIndex = 450;
+// the route canvas covers the whole map; let taps fall through to the road segments underneath
+map.getPane("route").style.pointerEvents = "none";
 const routeRenderer = L.canvas({ pane: "route" });
 
 let STATES = [], stateData = {}, segLayers = {}, segProps = {}, routeLayer = L.layerGroup().addTo(map);
@@ -155,8 +158,22 @@ async function loadPlaces() {
 async function loadNogo() {
   const fc = await api("/api/nogo");
   nogoLayer.clearLayers();
+  const hhmm = (t) => new Date(t * 1000).toLocaleString(EN ? "en-GB" : "ar-PS",
+    { timeZone: "Asia/Gaza", hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" });
   for (const f of fc.features) {
-    if (!f.properties.active) continue;
+    const p = f.properties;
+    if (p.active === false) continue;   // strike points carry no "active" flag; zones do
+    if (p.kind === "strike") {
+      const [lon, lat] = f.geometry.coordinates;
+      L.circle([lat, lon], { pane: "nogo", radius: p.buffer_m || 200, color: "#6d0f0f", weight: 1,
+        fillColor: "#c62828", fillOpacity: 0.15, dashArray: "4 3", interactive: false }).addTo(nogoLayer);
+      L.marker([lat, lon], { icon: L.divIcon({ className: "strike-ico", html: '<span style="font-size:20px">💥</span>', iconSize: [24, 24] }) })
+        .bindPopup(`<div class="pop"><h4>💥 ${T("ضربة حديثة", "Recent strike")}</h4>${p.time ? `<div>${hhmm(p.time)}</div>` : ""}
+          <div class="note">${T("المصدر", "Source")}: ${p.source || "—"}</div>
+          <div class="note">${T("نتجنب الطرق ضمن", "Routes avoid roads within")} ${ar(p.buffer_m || 200)} ${T("م", "m")}${p.expires ? ` ${T("حتى", "until")} ${hhmm(p.expires)}` : ""}</div></div>`)
+        .addTo(nogoLayer);
+      continue;
+    }
     L.geoJSON(f, { pane: "nogo", style: { color: "#6d0f0f", weight: 2, fillColor: "#c62828", fillOpacity: 0.18, dashArray: "6 4" }, interactive: true })
       .bindTooltip(T(`⛔ ${f.properties.name}<br><small>${f.properties.name_en} — يتم تجنبه مع هامش ٣٠٠م</small>`,
       `⛔ ${f.properties.name_en}<br><small>Avoided with a 300 m buffer</small>`), { sticky: true })
@@ -231,7 +248,7 @@ function renderResult(data, cachedAt = null) {
     <div class="barkey">${share.map(([s, v]) => `<span>${stLabel(s)} ${pct(v)}</span>`).join("")}</div>
     <ul class="legs">${legs}</ul>
     ${warns.map((w) => `<div class="warn">⚠️ ${w}</div>`).join("")}
-    <div class="sms-preview">📱 <b>${T(`رد SMS (${ar(data.sms.length)} حرف):`, `SMS reply (${data.sms.length} chars, sent in Arabic):`)}</b><br>${data.sms}</div>
+    <div class="sms-preview">📱 <b>${T(`رد SMS (${ar(data.sms.length)} حرف):`, `SMS reply (${data.sms.length} chars${/[\u0600-\u06ff]/.test(data.sms) ? ", sent in Arabic" : ""}):`)}</b><br>${data.sms}</div>
     <div class="disclaimer">${T("الظروف تتغير بسرعة. أوامر الإخلاء الرسمية لها الأولوية دائماً.", "Conditions change fast. Official evacuation orders always take priority.")}</div>`;
   el.insertAdjacentHTML("afterbegin", staleNote(cachedAt));
   el.insertAdjacentHTML("beforeend", saveControlHtml(data));
@@ -258,7 +275,7 @@ async function planRoute() {
   }
 }
 
-// ---- SMS simulator ----
+// ---- SMS simulator (always English, for presenting) ----
 const chat = document.getElementById("chat");
 function bubble(text, cls, meta) {
   const d = document.createElement("div");
@@ -272,18 +289,18 @@ async function sendSms(text) {
   if (!text.trim()) return;
   bubble(text, "me");
   let r;
-  try { r = await api("/api/sms", { method: "POST", body: { text, sender } }); }
-  catch { return bubble(T("📴 المحاكي يحتاج اتصالاً بالخادم. (رسائل SMS الحقيقية تعمل بدون إنترنت.)", "📴 The simulator needs the server. (Real SMS works without internet.)"), "alert", "simulator offline"); }
+  try { r = await api("/api/sms", { method: "POST", body: { text, sender, lang: "en" } }); }
+  catch { return bubble("📴 The simulator needs the server. (Real SMS works without internet.)", "alert", "simulator offline"); }
   bubble(r.reply, "bot", `${r.chars} chars · parsed by ${r.parsed.via}`);
   if (r.route) { renderResult({ route: r.route, sms: r.reply, from: { name: r.parsed.from }, to: { name: r.parsed.to }, signals: { fuel_index: +fuel.value } }); }
   if (r.results) await afterChange();
 }
 document.getElementById("smsform").addEventListener("submit", (e) => { e.preventDefault(); sendSms(smsin.value); smsin.value = ""; });
 document.getElementById("chips").addEventListener("click", (e) => { if (e.target.tagName === "BUTTON") sendSms(e.target.textContent); });
-bubble(T("مرحباً! أرسل: طريق [من] [إلى]\nمثال: طريق المواصي مستشفى ناصر", "Hi! Send: طريق [from] [to]\n(طريق = \"route\"; replies are in Arabic)\ne.g. طريق المواصي مستشفى ناصر"), "bot", "Tareeq SMS");
+bubble("Hi! Send: route [from] to [to]\ne.g. route Mawasi to Nasser Hospital\n(Real SMS replies are in Arabic.)", "bot", "Tareeq SMS");
 
 async function pollAlerts() {
-  const a = await api(`/api/alerts?sender=${encodeURIComponent(sender)}`).catch(() => ({ alerts: [] }));
+  const a = await api(`/api/alerts?sender=${encodeURIComponent(sender)}&lang=en`).catch(() => ({ alerts: [] }));
   for (const m of a.alerts) bubble("🔔 " + m, "alert", "alert · saved route");
 }
 

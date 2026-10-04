@@ -64,17 +64,32 @@
 
   <!-- left column: SMS / WhatsApp simulator -->
   <aside class="phone-wrap">
-    <div class="phone">
-      <div class="phone-top"><span data-en="SMS messages">رسائل SMS</span> · <span id="sender">+970-59-xxx</span></div>
+    <!-- always English for presenting the demo; real SMS replies are Arabic -->
+    <div class="phone" dir="ltr" lang="en">
+      <div class="phone-top">SMS messages · <span id="sender">+970-59-xxx</span></div>
       <div class="chat" id="chat"></div>
+      <!-- examples grouped by the kind of reply they produce; numbered questions are answered by typing the number -->
       <div class="chips" id="chips">
-        <button>طريق المواصي مستشفى ناصر</button>
-        <button>من دير البلح الى خانيونس</button>
-        <button>مغلق دوار بني سهيلا</button>
-        <button>تنبيه المواصي ناصر</button>
-        <button>مساعدة</button>
+        <span class="grp">Routes</span>
+        <button title="Single tuk-tuk ride: time range, fare, stand, confidence">route Mawasi to Nasser Hospital</button>
+        <button title="Ride plus a walking leg">route Deir el-Balah to Khan Younis</button>
+        <button title="Turn-by-turn walking directions">walk Mawasi to Nasser Hospital</button>
+        <button title="Walks 1.5 km over rubble. Plan the same trip with Wheelchair / stretcher ticked: it switches to a tuk-tuk with ~100 m on foot">route Khan Younis to Nasser Hospital</button>
+        <button title="Misspelt place name is still recognised">route Mawasi to Europian</button>
+        <span class="grp">Unclear → asks back</span>
+        <button title="Only one place: asks from where to where">route Mawasi</button>
+        <button title="Unknown place: numbered 'did you mean' list">route Mawasi to Hospitl</button>
+        <button title="Known place outside the pilot area">route Mawasi to Rafah</button>
+        <span class="grp">Reports</span>
+        <button title="Junction with several roads: asks which street">blocked Bani Suheila Roundabout</button>
+        <button title="Single report: waits for a second confirmation">open Nasser Hospital</button>
+        <button title="Trip feedback against the last quoted range">arrived 50</button>
+        <span class="grp">Other</span>
+        <button title="Subscribe to changes on a route">alert Mawasi to Nasser</button>
+        <button>privacy</button>
+        <button>help</button>
       </div>
-      <form id="smsform"><input id="smsin" placeholder="اكتب رسالة…" data-en-ph="Type a message…" autocomplete="off"><button data-en="Send">إرسال</button></form>
+      <form id="smsform"><input id="smsin" placeholder="Type a message…" autocomplete="off"><button>Send</button></form>
     </div>
   </aside>
 </main>
