@@ -1,7 +1,7 @@
-# طريق Tareeq — Gaza road status & honest trip times
+# طريق Tareeq — humanitarian road status & honest trip times
 
-Arabic-first, SMS-first service that answers **"Can I get there safely today, and how long will it really take?"**
-Built for the Deir al-Balah ↔ Khan Younis ↔ Al-Mawasi pilot corridor (see `../Tareeq — Product Spec v2.md`; the original `../Gaza Transit Info — Product Spec.md` is kept for history).
+Arabic-first, SMS-first humanitarian aid assistance tool that answers **"Can I get there safely today, and how long will it really take?"**
+Built around a single pilot corridor (see `../Tareeq — Product Spec v2.md`).
 
 > Demo build. Driver/rider reports, fares and wait times are **simulated**. No-go polygons are **illustrative, not real safety data**.
 
@@ -26,7 +26,7 @@ Optional: `export ANTHROPIC_API_KEY=...` turns on Claude parsing of free-form Ar
 | Road graph | OpenStreetMap via Overpass (Oct 2026), split into 7,325 segments of ≤250 m |
 | Damage prior | UNOSAT/UN-Habitat road damage assessment (imagery 2024-05-29): crater, debris, destroyed… mapped to Degraded / Foot-only priors at low confidence |
 | Places | OSM hospitals, clinics, camps, roundabouts + residents' aliases ("ناصر", "مواصي", "الدير") |
-| Basemap | Protomaps extract of Gaza (`data/build/gaza.pmtiles`), served from `/map/gaza.pmtiles`, so no third-party tile server is hit |
+| Basemap | Protomaps extract of the pilot region (`data/build/*.pmtiles`), served locally, so no third-party tile server is hit |
 | Strike hazards | NASA FIRMS fire detections, GDELT and an optional partner feed (`backend/strikes.py`), turned into expiring no-go zones |
 
 ## How it works
